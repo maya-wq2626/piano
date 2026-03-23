@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Piano Adventure! 🎹</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --C:#e74c3c;--D:#e67e22;--E:#f1c40f;--F:#2ecc71;--G:#3498db;--A:#6c5ce7;--B:#9b59b6;
+  --bg:#0f0a2e;--bg2:#1a1145;--card:#231a54;--card2:#2d2366;
+  --text:#f0eaff;--text2:#b8a9d4;--accent:#ff6b9d;--accent2:#ffd93d;
+  --success:#2ecc71;--glow:rgba(255,107,157,0.3);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes starPop{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.3) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes bounceIn{0%{transform:scale(0)}50%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes glow{0%,100%{box-shadow:0 0 5px var(--glow)}50%{box-shadow:0 0 25px var(--glow),0 0 50px var(--glow)}}
+@keyframes noteFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.5)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+#app{height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);position:relative;overflow:hidden}
+#app::before{content:'';position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,.3),transparent),radial-gradient(2px 2px at 40% 70%,rgba(255,255,255,.2),transparent),radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.4),transparent),radial-gradient(2px 2px at 80% 50%,rgba(255,255,255,.15),transparent),radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.3),transparent),radial-gradient(1px 1px at 90% 10%,rgba(255,255,255,.25),transparent);pointer-events:none;z-index:0}
+#app>*{position:relative;z-index:1}
+.header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(35,26,84,.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0}
+.header h1{font-family:'Fredoka',sans-serif;font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-user{display:flex;align-items:center;gap:10px;cursor:pointer;padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.05);transition:all .3s}
+.header-user:hover{background:rgba(255,255,255,.1)}
+.header-user .avatar{font-size:1.4rem}.header-user .name{font-size:.9rem;font-weight:600}
+.header-stars{display:flex;align-items:center;gap:6px;font-size:.9rem;color:var(--accent2);font-weight:700}
+.nav{display:flex;gap:4px;padding:8px 24px;background:rgba(35,26,84,.5);flex-shrink:0}
+.nav-btn{flex:1;padding:10px 16px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .3s;background:transparent;color:var(--text2)}
+.nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-btn.active{background:linear-gradient(135deg,rgba(255,107,157,.2),rgba(255,217,61,.1));color:var(--accent);border:1px solid rgba(255,107,157,.3)}
+.main{flex:1;overflow-y:auto;padding:20px 24px}
+.main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-track{background:transparent}.main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+.screen{display:none}.screen.active{display:block;animation:fadeIn .4s ease}
+.login-screen{display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);flex-direction:column;align-items:center;justify-content:center}
+.login-screen.active{display:flex}
+.login-title{font-family:'Fredoka',sans-serif;font-size:2.8rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent));background-size:200% auto;animation:shimmer 3s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-subtitle{color:var(--text2);font-size:1.1rem;margin-bottom:40px}
+.login-profiles{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:30px}
+.profile-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px 28px;border-radius:16px;background:var(--card);border:2px solid transparent;cursor:pointer;transition:all .3s;min-width:120px}
+.profile-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 25px rgba(255,107,157,.2)}
+.profile-card .avatar{font-size:2.5rem}.profile-card .name{font-weight:700;font-size:1rem}
+.add-profile-card{border:2px dashed rgba(255,255,255,.2);background:transparent}
+.add-profile-card:hover{border-color:var(--accent);background:rgba(255,107,157,.05)}
+.new-profile-form{display:none;flex-direction:column;align-items:center;gap:16px;padding:30px;border-radius:20px;background:var(--card);animation:bounceIn .4s ease}
+.new-profile-form.active{display:flex}
+.new-profile-form input{padding:12px 20px;border-radius:12px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);font-family:'Nunito',sans-serif;font-size:1rem;text-align:center;width:250px;outline:none;transition:border-color .3s}
+.new-profile-form input:focus{border-color:var(--accent)}
+.avatar-picker{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.avatar-option{font-size:2rem;padding:8px;border-radius:12px;cursor:pointer;border:2px solid transparent;transition:all .3s}
+.avatar-option:hover,.avatar-option.selected{border-color:var(--accent);background:rgba(255,107,157,.1);transform:scale(1.15)}
+.btn{padding:12px 28px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#ff8fab);color:white;box-shadow:0 4px 15px rgba(255,107,157,.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,157,.4)}
+.btn-secondary{background:rgba(255,255,255,.1);color:var(--text)}.btn-secondary:hover{background:rgba(255,255,255,.15)}
+.btn-small{padding:8px 18px;font-size:.85rem}.btn:disabled{opacity:.4;cursor:not-allowed}
+.lesson-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.lesson-card{padding:20px;border-radius:16px;background:var(--card);border:1px solid rgba(255,255,255,.05);cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.lesson-card:hover{transform:translateY(-4px);border-color:rgba(255,107,157,.3);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.lesson-card.locked{opacity:.5;cursor:not-allowed}.lesson-card.locked:hover{transform:none}
+.lesson-card.completed{border-color:rgba(46,204,113,.3)}
+.lesson-num{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:10px;font-weight:800;font-size:.9rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:var(--bg);margin-bottom:10px}
+.lesson-card.locked .lesson-num{background:rgba(255,255,255,.1);color:var(--text2)}
+.lesson-card h3{font-family:'Fredoka',sans-serif;font-size:1.15rem;margin-bottom:6px}
+.lesson-card p{font-size:.85rem;color:var(--text2);line-height:1.5}
+.lesson-stars{display:flex;gap:4px;margin-top:12px}.lesson-stars .star{font-size:1.1rem}
+.lock-icon{position:absolute;top:16px;right:16px;font-size:1.2rem;opacity:.4}
+.section-title{font-family:'Fredoka',sans-serif;font-size:1.4rem;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.lesson-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.back-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:none;color:var(--text);cursor:pointer;font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:600;transition:all .3s}
+.back-btn:hover{background:rgba(255,255,255,.1)}
+.lesson-progress-bar{display:flex;gap:4px;margin-bottom:24px}
+.lesson-step-pip{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.lesson-step-pip .pip{width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,.1);transition:background .5s}
+.lesson-step-pip .pip.done{background:var(--success)}.lesson-step-pip .pip.active{background:var(--accent);animation:glow 2s infinite}
+.lesson-step-pip .pip-label{font-size:.6rem;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.lesson-step-pip .pip-label.active{color:var(--accent)}.lesson-step-pip .pip-label.done{color:var(--success)}
+.activity-area{background:var(--card);border-radius:20px;padding:24px;border:1px solid rgba(255,255,255,.05);min-height:300px}
+.activity-title{font-family:'Fredoka',sans-serif;font-size:1.3rem;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.activity-desc{color:var(--text2);font-size:.95rem;margin-bottom:20px;line-height:1.6}
+.piano-container{display:flex;justify-content:center;margin:12px 0;overflow-x:auto;padding:10px 0}
+.piano{display:flex;position:relative;height:140px}
+.piano-key{position:relative;border-radius:0 0 8px 8px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:10px;user-select:none}
+.piano-key.white{width:46px;height:140px;background:white;border:1px solid #ddd;z-index:1;color:#555;font-size:.75rem;font-weight:700}
+.piano-key.white:hover{background:#f0f0f0}.piano-key.white.active{background:var(--key-color,#ddd);transform:scaleY(.98)}
+.piano-key.black{width:30px;height:90px;background:#222;margin-left:-15px;margin-right:-15px;z-index:2;color:#999;font-size:.65rem;font-weight:600;border-radius:0 0 6px 6px}
+.piano-key.black:hover{background:#333}.piano-key.black.active{background:var(--key-color,#555);transform:scaleY(.97)}
+.piano-key .note-label{pointer-events:none;font-family:'Fredoka',sans-serif;transition:opacity .3s}
+.piano-key .color-dot{width:10px;height:10px;border-radius:50%;margin-bottom:4px;pointer-events:none}
+.piano-key.highlight{animation:pulse 1s ease infinite}
+.piano-key.highlight.white{box-shadow:inset 0 -4px 0 var(--key-color),0 0 15px var(--key-color)}
+.song-player{text-align:center}
+.note-display{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0;min-height:50px;align-items:center}
+.note-block{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Fredoka',sans-serif;font-size:.85rem;transition:all .3s;opacity:.4;transform:scale(.9)}
+.note-block.played{opacity:.3;transform:scale(.8)}.note-block.current{opacity:1;transform:scale(1.2);box-shadow:0 0 20px currentColor;animation:pulse .8s ease infinite}.note-block.upcoming{opacity:.6;transform:scale(1)}
+.tempo-control{display:flex;align-items:center;gap:12px;justify-content:center;margin:12px 0}
+.tempo-control label{font-size:.85rem;color:var(--text2);font-weight:600}
+.tempo-slider{-webkit-appearance:none;width:200px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);outline:none}
+.tempo-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--accent);cursor:pointer}
+.player-controls{display:flex;gap:10px;justify-content:center;margin:12px 0}
+/* Song staff scroll */
+.song-staff-wrap{overflow-x:auto;margin:12px 0;background:rgba(0,0,0,.2);border-radius:12px;padding:10px 0}
+.song-staff-wrap::-webkit-scrollbar{height:6px}.song-staff-wrap::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+.quiz-area{text-align:center}
+.quiz-question{font-family:'Fredoka',sans-serif;font-size:1.3rem;margin-bottom:20px;line-height:1.5}
+.quiz-options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.quiz-option{padding:14px 24px;border-radius:14px;border:2px solid rgba(255,255,255,.1);background:var(--card2);cursor:pointer;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:700;color:var(--text);transition:all .3s;min-width:100px}
+.quiz-option:hover{border-color:var(--accent);transform:translateY(-2px)}
+.quiz-option.correct{border-color:var(--success);background:rgba(46,204,113,.15);animation:bounceIn .4s ease}
+.quiz-option.wrong{border-color:#e74c3c;background:rgba(231,76,60,.15);opacity:.6}
+.quiz-feedback{margin-top:16px;font-size:1.1rem;font-weight:700;min-height:30px}
+.song-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.song-card{padding:18px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);cursor:pointer;transition:all .3s}
+.song-card:hover{transform:translateY(-3px);border-color:rgba(255,107,157,.3);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.song-card h3{font-family:'Fredoka',sans-serif;font-size:1.05rem;margin-bottom:4px}
+.song-card .difficulty{font-size:.85rem;margin-bottom:6px}.song-card .song-notes{font-size:.8rem;color:var(--text2)}
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
+.badge-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);text-align:center}
+.badge-card.earned{border-color:rgba(255,217,61,.3)}.badge-card.locked{opacity:.35}
+.badge-icon{font-size:2.5rem}.badge-name{font-family:'Fredoka',sans-serif;font-size:.9rem;font-weight:600}.badge-desc{font-size:.75rem;color:var(--text2)}
+.completion-screen{text-align:center;padding:30px}
+.completion-screen h2{font-family:'Fredoka',sans-serif;font-size:2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px}
+.big-star{font-size:4rem;animation:starPop .8s ease forwards}
+.staff-container{background:rgba(0,0,0,.2);border-radius:16px;padding:24px 16px;margin:16px 0;display:flex;flex-direction:column;align-items:center;gap:20px}
+.staff-note-cards{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.staff-note-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 20px;border-radius:14px;background:var(--card2);border:2px solid rgba(255,255,255,.05);cursor:pointer;transition:all .3s;min-width:90px}
+.staff-note-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.staff-note-card .sn-letter{font-family:'Fredoka',sans-serif;font-size:1.6rem;font-weight:700}
+.staff-note-card .sn-label{font-size:.75rem;color:var(--text2)}
+.staff-note-card.active{border-color:var(--accent);box-shadow:0 0 15px var(--glow)}
+.float-note{position:fixed;pointer-events:none;font-size:1.5rem;z-index:999;animation:noteFloat 1.2s ease forwards}
+@media(max-width:600px){
+  .header{padding:10px 16px}.header h1{font-size:1.2rem}.nav{padding:6px 12px}.nav-btn{padding:8px 10px;font-size:.8rem}
+  .main{padding:14px 12px}.piano-key.white{width:36px;height:120px}.piano-key.black{width:24px;height:75px;margin-left:-12px;margin-right:-12px}
+  .lesson-grid{grid-template-columns:1fr}.lesson-step-pip .pip-label{font-size:.5rem}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="login-screen active" id="loginScreen">
+    <div class="login-title">🎹 Piano Adventure!</div>
+    <div class="login-subtitle">Who's playing today?</div>
+    <div class="login-profiles" id="profileList"></div>
+    <div class="new-profile-form" id="newProfileForm">
+      <div style="font-family:'Fredoka',sans-serif;font-size:1.1rem;font-weight:600;">Create Your Profile</div>
+      <input type="text" id="newName" placeholder="Your name..." maxlength="20" autocomplete="off">
+      <div class="avatar-picker" id="avatarPicker"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary btn-small" onclick="toggleNewProfile(false)">Cancel</button>
+        <button class="btn btn-primary btn-small" onclick="createProfile()">Let's Go!</button>
+      </div>
+    </div>
+  </div>
+  <div class="header" id="appHeader" style="display:none">
+    <h1>🎹 Piano Adventure!</h1>
+    <div class="header-stars" id="headerStars">⭐ 0</div>
+    <div class="header-user" onclick="logout()"><span class="avatar" id="headerAvatar"></span><span class="name" id="headerName"></span></div>
+  </div>
+  <div class="nav" id="appNav" style="display:none">
+    <button class="nav-btn active" data-screen="home" onclick="showScreen('home')">🏠 Lessons</button>
+    <button class="nav-btn" data-screen="library" onclick="showScreen('library')">🎵 Songs</button>
+    <button class="nav-btn" data-screen="badges" onclick="showScreen('badges')">🏆 Badges</button>
+  </div>
+  <div class="main" id="appMain" style="display:none">
+    <div class="screen active" id="screen-home"><div class="section-title">🎓 Your Lessons</div><div class="lesson-grid" id="lessonGrid"></div></div>
+    <div class="screen" id="screen-lesson">
+      <div class="lesson-header"><button class="back-btn" onclick="exitLesson()">← Back</button><div style="flex:1;font-family:'Fredoka',sans-serif;font-size:1.2rem" id="lessonViewTitle"></div></div>
+      <div class="lesson-progress-bar" id="lessonProgressBar"></div>
+      <div class="activity-area" id="activityArea"></div>
+      <div style="text-align:center;margin-top:16px"><button class="btn btn-primary" id="nextStepBtn" onclick="nextStep()">Next →</button></div>
+    </div>
+    <div class="screen" id="screen-library"><div class="section-title">🎵 Song Library</div><div class="song-grid" id="songGrid"></div></div>
+    <div class="screen" id="screen-songplayer">
+      <div class="lesson-header"><button class="back-btn" onclick="exitSongPlayer()">← Back</button><div style="flex:1;font-family:'Fredoka',sans-serif;font-size:1.2rem" id="songPlayerTitle"></div></div>
+      <div id="songPlayerArea"></div>
+    </div>
+    <div class="screen" id="screen-badges"><div class="section-title">🏆 Your Badges</div><div class="badges-grid" id="badgesGrid"></div></div>
+  </div>
+</div>
+<script>
+// ===== AUDIO =====
+const AudioCtx=window.AudioContext||window.webkitAudioContext;let audioCtx;
+function ensureAudio(){if(!audioCtx)audioCtx=new AudioCtx();if(audioCtx.state==='suspended')audioCtx.resume()}
+const NOTE_FREQS={'C3':130.81,'C#3':138.59,'D3':146.83,'D#3':155.56,'E3':164.81,'F3':174.61,'F#3':185,'G3':196,'G#3':207.65,'A3':220,'A#3':233.08,'B3':246.94,'C4':261.63,'C#4':277.18,'D4':293.66,'D#4':311.13,'E4':329.63,'F4':349.23,'F#4':369.99,'G4':392,'G#4':415.3,'A4':440,'A#4':466.16,'B4':493.88,'C5':523.25,'C#5':554.37,'D5':587.33,'D#5':622.25,'E5':659.26,'F5':698.46,'F#5':739.99,'G5':783.99,'G#5':830.61,'A5':880,'A#5':932.33,'B5':987.77,'C6':1046.5};
+function playNote(n,d=.4){ensureAudio();const f=NOTE_FREQS[n];if(!f)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain(),fi=audioCtx.createBiquadFilter();o.type='triangle';o.frequency.value=f;fi.type='lowpass';fi.frequency.value=2000;g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(.3,audioCtx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+d);o.connect(fi);fi.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d+.05);spawnFloat()}
+function spawnFloat(){const e=document.createElement('div');e.className='float-note';e.textContent=['🎵','🎶','✨','💫'][Math.random()*4|0];e.style.left=(20+Math.random()*60)+'%';e.style.top=(40+Math.random()*30)+'%';document.body.appendChild(e);setTimeout(()=>e.remove(),1200)}
+
+// ===== HELPERS =====
+const NC={C:'#e74c3c',D:'#e67e22',E:'#f1c40f',F:'#2ecc71',G:'#3498db',A:'#6c5ce7',B:'#9b59b6'};
+function gc(n){return NC[n.replace(/[0-9#]/g,'')]||'#888'}
+function gl(n){return n.replace(/[0-9]/g,'')}
+function gb(n){return n.replace(/[0-9]/g,'')}
+
+// ===== STAFF MAPS =====
+const SYM={'C4':0,'D4':1,'E4':2,'F4':3,'G4':4,'A4':5,'B4':6,'C5':7,'D5':8,'E5':9,'F5':10};
+const SNI={
+  'C4':{pos:'ledger'},'D4':{pos:'below'},'E4':{pos:'line'},'F4':{pos:'space'},
+  'G4':{pos:'line'},'A4':{pos:'space'},'B4':{pos:'line'},'C5':{pos:'space'},
+};
+
+const AVATARS=['🎹','🎵','🎶','🎸','🥁','🎺','🎻','🦄','🌟','🦋','🐱','🐶','🎨','🌈','🚀','🍕'];
+async function loadData(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null}catch{return null}}
+async function saveData(k,v){try{await window.storage.set(k,JSON.stringify(v))}catch(e){console.error(e)}}
+
+let currentUser=null,allProfiles=[],userProgress={};
+const STEP_NAMES=['Explore','Play','Read Notes','Quiz','Show Time!'];
+const TOTAL_STEPS=5;
+
+// ===== LESSONS 1-8 =====
+const LESSONS=[
+{id:1,title:'Meet C, D, E',desc:'Learn your first three notes and play Hot Cross Buns!',notes:['C4','D4','E4'],
+explore:{title:'🎹 Explore: Find C, D, E',desc:"Let's start with three notes! Look at your piano and find the group of 2 black keys. The white key just to the LEFT of them is C. D is the next white key, and E is the one after that. Click the keys below to hear them!",highlightNotes:['C4','D4','E4']},
+song:{title:'🎵 Play: Hot Cross Buns',desc:"Watch the colored notes light up and play along on your piano!",name:'Hot Cross Buns',notes:['E4','D4','C4','_','E4','D4','C4','_','C4','C4','D4','D4','E4','D4','C4'],durations:[1,1,2,1,1,1,2,1,.5,.5,.5,.5,1,1,2]},
+readNotes:{title:'📖 Read Notes: C, D, E on the Staff',desc:"Music is written on 5 lines called a <b>staff</b>. Each note has its own spot! Click each card to see it on the staff and hear it!",notes:['C4','D4','E4'],
+teachText:["This is <b>Middle C</b>! It gets its own little line below the staff called a <b>ledger line</b>. It's the home base of piano!","<b>D</b> hangs just below the bottom line of the staff — peeking up from underneath!","<b>E</b> sits right ON the bottom line. The lines spell <b>E-G-B-D-F</b> from bottom to top!"]},
+quiz:{title:'🧩 Quiz: Match the Sound!',desc:"I'll play a note — can you tell me which one it is?",questions:[{play:'C4',options:['C','D','E'],answer:'C'},{play:'E4',options:['C','D','E'],answer:'E'},{play:'D4',options:['C','D','E'],answer:'D'},{play:'C4',options:['C','D','E'],answer:'C'},{play:'E4',options:['D','E','C'],answer:'E'}]},
+showtime:{title:'🎤 Show Time!',desc:'Play Hot Cross Buns for your family! Colors are faded — you know this! 🌟',name:'Hot Cross Buns',notes:['E4','D4','C4','_','E4','D4','C4','_','C4','C4','D4','D4','E4','D4','C4'],durations:[1,1,2,1,1,1,2,1,.5,.5,.5,.5,1,1,2],faded:true}
+},
+{id:2,title:'Adding F & G',desc:'Learn five notes and play Mary Had a Little Lamb!',notes:['C4','D4','E4','F4','G4'],
+explore:{title:'🎹 Explore: Meet F & G',desc:"F is the next white key after E, and G is one more after that. Your right hand fingers: thumb=C, pointer=D, middle=E, ring=F, pinky=G!",highlightNotes:['C4','D4','E4','F4','G4'],fingerLabels:{C4:'1 👆',D4:'2',E4:'3',F4:'4',G4:'5'}},
+song:{title:'🎵 Play: Mary Had a Little Lamb',desc:'This song uses E, D, C and adds G! Follow the colored notes.',name:'Mary Had a Little Lamb',notes:['E4','D4','C4','D4','E4','E4','E4','_','D4','D4','D4','_','E4','G4','G4','_','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: F & G Join the Staff',desc:"Let's see where F and G live on the music staff!",notes:['C4','D4','E4','F4','G4'],
+teachText:["<b>Middle C</b> — on its own ledger line below the staff!","<b>D</b> — just below the first line.","<b>E</b> — right on the bottom (first) line.","<b>F</b> is in the first SPACE. The spaces spell <b>F-A-C-E</b>!","<b>G</b> sits on the second line. Lines: <b>Every Good Boy Does Fine</b>!"]},
+quiz:{title:'🧩 Quiz: Name That Key!',desc:'Can you identify all five notes?',questions:[{play:'F4',options:['E','F','G'],answer:'F'},{play:'G4',options:['E','F','G'],answer:'G'},{play:'C4',options:['C','D','F'],answer:'C'},{play:'D4',options:['C','D','E'],answer:'D'},{play:'F4',options:['D','F','G'],answer:'F'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Mary Had a Little Lamb for everyone! 🎉",name:'Mary Had a Little Lamb',notes:['E4','D4','C4','D4','E4','E4','E4','_','D4','D4','D4','_','E4','G4','G4','_','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2],faded:true}
+},
+{id:3,title:'A & B — Full Scale!',desc:'Learn all seven notes and start Twinkle Twinkle!',notes:['C4','D4','E4','F4','G4','A4','B4'],
+explore:{title:'🎹 Explore: A & B Complete the Scale!',desc:"A comes after G, and B is the last note before the next C. C-D-E-F-G-A-B is a complete scale — the musical alphabet!",highlightNotes:['C4','D4','E4','F4','G4','A4','B4']},
+song:{title:'🎵 Play: Twinkle Twinkle (First Half)',desc:"This famous song uses C, D, E, F, G, and A!",name:'Twinkle Twinkle (Part 1)',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: A & B Climb Higher',desc:"A and B take us higher on the staff. Notice lines and spaces alternate!",notes:['E4','F4','G4','A4','B4'],
+teachText:["<b>E</b> — on the first line.","<b>F</b> — in the first space (F-A-C-E).","<b>G</b> — on the second line.","<b>A</b> is in the second space — the A in F-A-C-E!","<b>B</b> sits on the third line — right in the middle of the staff!"]},
+quiz:{title:'🧩 Quiz: The Full Scale!',desc:'Test your ears with all seven notes!',questions:[{play:'A4',options:['F','G','A'],answer:'A'},{play:'B4',options:['A','B','C'],answer:'B'},{play:'G4',options:['F','G','A'],answer:'G'},{play:'A4',options:['A','B','E'],answer:'A'},{play:'B4',options:['G','A','B'],answer:'B'}]},
+showtime:{title:'🎤 Show Time!',desc:'Play the first half of Twinkle Twinkle! Get ready for applause! ✨',name:'Twinkle Twinkle (Part 1)',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2],faded:true}
+},
+{id:4,title:'Full Octave & Twinkle!',desc:'Master the octave and play the full Twinkle Twinkle!',notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+explore:{title:'🎹 Explore: The Full Octave!',desc:"After B, the next white key is C again — but HIGHER! This is called an octave. The pattern repeats forever up and down the piano!",highlightNotes:['C4','D4','E4','F4','G4','A4','B4','C5']},
+song:{title:'🎵 Play: Twinkle Twinkle (Complete!)',desc:"The full song! You already know the first part.",name:'Twinkle Twinkle Little Star',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: The Full Picture!',desc:"ALL the notes from Middle C to High C on the staff!",notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+teachText:["<b>Middle C</b> — on its own ledger line. Home base!","<b>D</b> — just below the staff.","<b>E</b> — first line.","<b>F</b> — first space.","<b>G</b> — second line.","<b>A</b> — second space.","<b>B</b> — third line.","<b>High C</b> — in the third space! Same letter, one octave higher."]},
+quiz:{title:'🧩 Quiz: Octave Master!',desc:'Hear the difference between low and high?',questions:[{play:'C4',options:['Low C','High C','G'],answer:'Low C'},{play:'C5',options:['Low C','High C','A'],answer:'High C'},{play:'A4',options:['F','G','A'],answer:'A'},{play:'B4',options:['A','B','High C'],answer:'B'},{play:'G4',options:['E','F','G'],answer:'G'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play ALL of Twinkle Twinkle! Take a bow! 🌟🎉",name:'Twinkle Twinkle (Full)',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 5: Steps & Skips =====
+{id:5,title:'Steps & Skips',desc:'Learn to move by step and by skip — and play Ode to Joy!',notes:['C4','D4','E4','F4','G4'],
+explore:{title:'🎹 Explore: Steps & Skips',desc:"A <b>step</b> is moving to the very next key (like C→D or E→F). A <b>skip</b> jumps over one key (like C→E or D→F). Steps sound smooth, skips sound jumpy! Try both below — play C then D (step), then C then E (skip). Hear the difference?",highlightNotes:['C4','D4','E4','F4','G4']},
+song:{title:'🎵 Play: Ode to Joy',desc:"Beethoven's famous melody! It mostly moves by steps, with a few skips. Listen for the smooth, flowing feeling.",name:'Ode to Joy',notes:['E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','E4','D4','D4','_','E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','D4','C4','C4'],durations:[1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2]},
+readNotes:{title:'📖 Read Notes: Seeing Steps & Skips',desc:"On the staff, a <b>step</b> moves from a line to the next space (or space to line). A <b>skip</b> jumps from line to line or space to space!",notes:['C4','D4','E4','F4','G4'],
+teachText:["<b>C</b> on its ledger line.","<b>D</b> is one step up from C — line to space.","<b>E</b> is one step up from D — but a skip from C (line to line)!","<b>F</b> is a step from E (line to space), a skip from D.","<b>G</b> is a step from F, a skip from E. See the pattern?"]},
+quiz:{title:'🧩 Quiz: Step or Skip?',desc:"I'll play two notes. Is it a step or a skip?",questions:[{play:'C4',play2:'D4',options:['Step','Skip'],answer:'Step'},{play:'C4',play2:'E4',options:['Step','Skip'],answer:'Skip'},{play:'E4',play2:'F4',options:['Step','Skip'],answer:'Step'},{play:'D4',play2:'F4',options:['Step','Skip'],answer:'Skip'},{play:'F4',play2:'G4',options:['Step','Skip'],answer:'Step'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Ode to Joy for your family! This is a real classical piece — impressive! 🎶",name:'Ode to Joy',notes:['E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','E4','D4','D4','_','E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','D4','C4','C4'],durations:[1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2],faded:true}
+},
+// ===== LESSON 6: Meet the Treble Clef =====
+{id:6,title:'Meet the Treble Clef',desc:'Learn what the curly symbol means and review all notes on the staff!',notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+explore:{title:'🎹 Explore: The Treble Clef',desc:"That fancy curly symbol 𝄞 at the start of every staff is the <b>Treble Clef</b> (also called the G clef). It tells you which notes go where! The curl of the clef wraps around the second line — and that's the G line. Everything else is measured from there. Play all the notes to review!",highlightNotes:['C4','D4','E4','F4','G4','A4','B4','C5']},
+song:{title:'🎵 Play: London Bridge',desc:"A fun song that uses steps and skips you've learned!",name:'London Bridge',notes:['G4','A4','G4','F4','E4','F4','G4','_','D4','E4','F4','_','E4','F4','G4','_','G4','A4','G4','F4','E4','F4','G4','_','D4','G4','E4','C4'],durations:[1.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1.5,.5,1,1,1,1,2,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Lines & Spaces Review',desc:"Let's lock in the memory tricks! Lines from bottom: <b>Every Good Boy Does Fine</b>. Spaces: <b>F-A-C-E</b>. Click each note!",notes:['E4','G4','B4','F4','A4','C5'],
+teachText:["<b>E</b> — first line. <b>E</b>very...","<b>G</b> — second line. Every <b>G</b>ood...","<b>B</b> — third line. Every Good <b>B</b>oy...","<b>F</b> — first space. <b>F</b>-A-C-E!","<b>A</b> — second space. F-<b>A</b>-C-E!","<b>C</b> — third space. F-A-<b>C</b>-E!"]},
+quiz:{title:'🧩 Quiz: Staff Reading!',desc:"I'll show you a note on the staff — name it!",questions:[{play:'E4',options:['D','E','F'],answer:'E'},{play:'A4',options:['G','A','B'],answer:'A'},{play:'F4',options:['E','F','G'],answer:'F'},{play:'B4',options:['A','B','C'],answer:'B'},{play:'C5',options:['B','C','D'],answer:'C'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play London Bridge! A classic everyone can sing along to! 🎵",name:'London Bridge',notes:['G4','A4','G4','F4','E4','F4','G4','_','D4','E4','F4','_','E4','F4','G4','_','G4','A4','G4','F4','E4','F4','G4','_','D4','G4','E4','C4'],durations:[1.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1.5,.5,1,1,1,1,2,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 7: Rhythm Basics =====
+{id:7,title:'Rhythm Basics',desc:'Learn about quarter notes, half notes, and counting beats!',notes:['C4','D4','E4','F4','G4'],
+explore:{title:'🎹 Explore: Beat & Rhythm',desc:"Music has a steady beat — like a heartbeat! A <b>quarter note</b> ♩ gets 1 beat. A <b>half note</b> 𝅗𝅥 gets 2 beats (hold it twice as long). Try tapping your foot to a steady beat, then play C for 1 beat (quick) and then C for 2 beats (hold longer).",highlightNotes:['C4','D4','E4','F4','G4']},
+song:{title:'🎵 Play: Row Row Row Your Boat',desc:"This song mixes quarter notes (short) and longer notes. Listen for which notes you hold longer!",name:'Row Row Row Your Boat',notes:['C4','C4','C4','D4','E4','_','E4','D4','E4','F4','G4','_','C5','C5','C5','G4','G4','G4','E4','E4','E4','C4','C4','C4','G4','F4','E4','D4','C4'],durations:[1,1,.75,.25,1,1,.75,.25,.75,.25,2,1,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Note Lengths',desc:"Notes look different depending on how long you hold them! A <b>filled note head</b> with a stem ♩ = quarter note (1 beat). An <b>open note head</b> with a stem 𝅗𝅥 = half note (2 beats). A <b>whole note</b> 𝅝 = 4 beats!",notes:['C4','D4','E4','F4','G4'],
+teachText:["<b>C</b> — play this as a quarter note: quick, 1 beat.","<b>D</b> — now imagine holding D for 2 beats: that's a half note!","<b>E</b> — back to 1 beat. Tap your foot once.","<b>F</b> — try holding F for 4 beats: that's a whole note! Count 1-2-3-4.","<b>G</b> — mix it up! Play G short (quarter), then G long (half). Feel the difference!"]},
+quiz:{title:'🧩 Quiz: Counting Beats!',desc:"How many beats does each note type get?",questions:[{play:'C4',options:['1 beat','2 beats','4 beats'],answer:'1 beat',label:'Quarter note ♩'},{play:'D4',options:['1 beat','2 beats','4 beats'],answer:'2 beats',label:'Half note 𝅗𝅥'},{play:'E4',options:['1 beat','2 beats','4 beats'],answer:'4 beats',label:'Whole note 𝅝'},{play:'F4',options:['1 beat','2 beats','3 beats'],answer:'2 beats',label:'Half note 𝅗𝅥'},{play:'G4',options:['1 beat','2 beats','4 beats'],answer:'1 beat',label:'Quarter note ♩'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Row Row Row Your Boat! Try to hold the longer notes for their full length! 🚣",name:'Row Row Row Your Boat',notes:['C4','C4','C4','D4','E4','_','E4','D4','E4','F4','G4','_','C5','C5','C5','G4','G4','G4','E4','E4','E4','C4','C4','C4','G4','F4','E4','D4','C4'],durations:[1,1,.75,.25,1,1,.75,.25,.75,.25,2,1,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 8: Putting It Together =====
+{id:8,title:'Putting It Together',desc:'Combine notes, rhythm, and staff reading — play Jingle Bells!',notes:['C4','D4','E4','F4','G4','A4','B4'],
+explore:{title:'🎹 Explore: You Know So Much!',desc:"Let's review everything: you know all 7 notes (C through B), you can read them on the staff, and you understand quarter and half notes. That's amazing! Play through all the notes to warm up your fingers.",highlightNotes:['C4','D4','E4','F4','G4','A4','B4']},
+song:{title:'🎵 Play: Jingle Bells',desc:"A festive classic! Watch for the repeating patterns — E-E-E, E-E-E. The melody mostly uses steps with a few bigger jumps.",name:'Jingle Bells',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Reading a Full Melody',desc:"Now let's see Jingle Bells on the staff! Notice how the notes move — lots of repeated E's, then steps and skips. When you see the same note repeated, your finger stays in place!",notes:['C4','D4','E4','F4','G4'],
+teachText:["<b>C</b> — on the ledger line. Jingle Bells starts higher but comes back to C.","<b>D</b> — below the staff. Appears near the end of phrases.","<b>E</b> — first line. The STAR of this song! E-E-E is the main pattern.","<b>F</b> — first space. Shows up in the second half.","<b>G</b> — second line. The big jump from E to G gives the song energy!"]},
+quiz:{title:'🧩 Quiz: Master Challenge!',desc:"A mix of everything you've learned!",questions:[{play:'E4',options:['D','E','F'],answer:'E'},{play:'G4',options:['F','G','A'],answer:'G'},{play:'C4',play2:'E4',options:['Step','Skip'],answer:'Skip'},{play:'F4',options:['E','F','G'],answer:'F'},{play:'D4',play2:'E4',options:['Step','Skip'],answer:'Step'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Jingle Bells for everyone! Perfect for any time of year! 🔔🎉",name:'Jingle Bells',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2],faded:true}
+}
+];
+
+// ===== SONG LIBRARY =====
+const SONG_LIBRARY=[
+{id:'hcb',name:'Hot Cross Buns',difficulty:1,notesUsed:'C D E',notes:['E4','D4','C4','_','E4','D4','C4','_','C4','C4','D4','D4','E4','D4','C4'],durations:[1,1,2,1,1,1,2,1,.5,.5,.5,.5,1,1,2]},
+{id:'mary',name:'Mary Had a Little Lamb',difficulty:1,notesUsed:'C D E G',notes:['E4','D4','C4','D4','E4','E4','E4','_','D4','D4','D4','_','E4','G4','G4','_','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2]},
+{id:'twinkle',name:'Twinkle Twinkle Little Star',difficulty:2,notesUsed:'C D E F G A',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+{id:'ode',name:'Ode to Joy',difficulty:2,notesUsed:'C D E F G',notes:['E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','E4','D4','D4','_','E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','D4','C4','C4'],durations:[1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2]},
+{id:'london',name:'London Bridge',difficulty:1,notesUsed:'C D E F G A',notes:['G4','A4','G4','F4','E4','F4','G4','_','D4','E4','F4','_','E4','F4','G4','_','G4','A4','G4','F4','E4','F4','G4','_','D4','G4','E4','C4'],durations:[1.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1.5,.5,1,1,1,1,2,1,1,1,1,2]},
+{id:'row',name:'Row Row Row Your Boat',difficulty:1,notesUsed:'C D E F G',notes:['C4','C4','C4','D4','E4','_','E4','D4','E4','F4','G4','_','C5','C5','C5','G4','G4','G4','E4','E4','E4','C4','C4','C4','G4','F4','E4','D4','C4'],durations:[1,1,.75,.25,1,1,.75,.25,.75,.25,2,1,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,1,1,1,1,2]},
+{id:'happy',name:'Happy Birthday',difficulty:2,notesUsed:'C D E F G A B',notes:['C4','C4','D4','C4','F4','E4','_','C4','C4','D4','C4','G4','F4','_','C4','C4','C5','A4','F4','E4','D4','_','B4','B4','A4','F4','G4','F4'],durations:[.75,.25,1,1,1,2,1,.75,.25,1,1,1,2,1,.75,.25,1,1,1,1,2,1,.75,.25,1,1,1,2]},
+{id:'jingle',name:'Jingle Bells',difficulty:2,notesUsed:'C D E F G',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2]},
+{id:'saints',name:'When the Saints Go Marching In',difficulty:2,notesUsed:'C D E F G',notes:['C4','E4','F4','G4','_','C4','E4','F4','G4','_','C4','E4','F4','G4','E4','C4','E4','D4','_','E4','E4','D4','C4','C4','E4','G4','G4','F4','_','E4','F4','G4','E4','C4','D4','C4'],durations:[1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+{id:'furelise',name:'Für Elise (Simplified)',difficulty:3,notesUsed:'C D E G# A B',notes:['E5','D#4','E5','D#4','E5','B4','D5','C5','A4','_','C4','E4','A4','B4','_','E4','G#4','B4','C5'],durations:[.5,.5,.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,1,1,.5,.5,.5,1]},
+];
+
+const BADGES=[
+{id:'first_note',name:'First Note!',icon:'🎵',desc:'Played your first note'},
+{id:'lesson1',name:'Lesson 1 Complete',icon:'🌟',desc:'Finished your first lesson'},
+{id:'lesson2',name:'Five Fingers',icon:'🖐️',desc:'Completed Lesson 2'},
+{id:'lesson3',name:'Scale Master',icon:'🎼',desc:'Learned the full scale'},
+{id:'lesson4',name:'Octave Explorer',icon:'🚀',desc:'Mastered the octave'},
+{id:'lesson5',name:'Step & Skip Pro',icon:'👣',desc:'Completed Lesson 5'},
+{id:'lesson6',name:'Clef Reader',icon:'𝄞',desc:'Met the treble clef'},
+{id:'lesson7',name:'Rhythm Keeper',icon:'🥁',desc:'Learned rhythm basics'},
+{id:'lesson8',name:'Music Maker',icon:'🎹',desc:'Put it all together'},
+{id:'note_reader',name:'Note Reader',icon:'📖',desc:'Completed a Read Notes activity'},
+{id:'song_explorer',name:'Song Explorer',icon:'🎶',desc:'Played 3 library songs'},
+{id:'perfectquiz',name:'Perfect Score',icon:'💯',desc:'Got all quiz answers right'},
+];
+
+// ===== INIT =====
+async function init(){allProfiles=(await loadData('piano-profiles'))||[];renderLogin();renderAvatarPicker()}
+
+function renderLogin(){const el=document.getElementById('profileList');el.innerHTML='';allProfiles.forEach((p,i)=>{const c=document.createElement('div');c.className='profile-card';c.innerHTML=`<div class="avatar">${p.avatar}</div><div class="name">${p.name}</div>`;c.onclick=()=>loginAs(i);el.appendChild(c)});const a=document.createElement('div');a.className='profile-card add-profile-card';a.innerHTML='<div class="avatar" style="opacity:.4">➕</div><div class="name" style="color:var(--text2)">New Player</div>';a.onclick=()=>toggleNewProfile(true);el.appendChild(a)}
+function renderAvatarPicker(){const el=document.getElementById('avatarPicker');el.innerHTML='';AVATARS.forEach(a=>{const o=document.createElement('span');o.className='avatar-option';o.textContent=a;o.onclick=()=>{el.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));o.classList.add('selected')};el.appendChild(o)})}
+function toggleNewProfile(s){document.getElementById('newProfileForm').classList.toggle('active',s);if(s)document.getElementById('newName').focus()}
+async function createProfile(){const n=document.getElementById('newName').value.trim();const s=document.querySelector('.avatar-option.selected');if(!n)return;allProfiles.push({name:n,avatar:s?s.textContent:'🎹',created:Date.now()});await saveData('piano-profiles',allProfiles);document.getElementById('newName').value='';document.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));toggleNewProfile(false);renderLogin();loginAs(allProfiles.length-1)}
+async function loginAs(i){currentUser=allProfiles[i];currentUser._idx=i;userProgress=(await loadData(`piano-progress-${i}`))||{lessonsCompleted:[],lessonStars:{},badges:[],totalStars:0,songsPlayed:[],quizPerfect:[],firstNote:false};document.getElementById('loginScreen').classList.remove('active');document.getElementById('appHeader').style.display='';document.getElementById('appNav').style.display='';document.getElementById('appMain').style.display='';document.getElementById('headerAvatar').textContent=currentUser.avatar;document.getElementById('headerName').textContent=currentUser.name;updateStars();renderHome();renderSongLibrary();renderBadges();showScreen('home')}
+function logout(){currentUser=null;document.getElementById('loginScreen').classList.add('active');document.getElementById('appHeader').style.display='none';document.getElementById('appNav').style.display='none';document.getElementById('appMain').style.display='none';renderLogin()}
+async function saveProgress(){if(currentUser)await saveData(`piano-progress-${currentUser._idx}`,userProgress);updateStars()}
+function updateStars(){document.getElementById('headerStars').textContent=`⭐ ${userProgress.totalStars||0}`}
+function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(`screen-${n}`).classList.add('active');document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.screen===n));stopPlayback()}
+
+function renderHome(){const g=document.getElementById('lessonGrid');g.innerHTML='';LESSONS.forEach((l,i)=>{const done=userProgress.lessonsCompleted.includes(l.id);const ok=i===0||userProgress.lessonsCompleted.includes(LESSONS[i-1].id);const st=userProgress.lessonStars[l.id]||0;const c=document.createElement('div');c.className=`lesson-card ${done?'completed':''} ${!ok?'locked':''}`;c.innerHTML=`<div class="lesson-num">${l.id}</div>${!ok?'<div class="lock-icon">🔒</div>':''}<h3>${l.title}</h3><p>${l.desc}</p><div class="lesson-stars">${[1,2,3,4,5].map(s=>`<span class="star" style="${st>=s?'animation:starPop .5s ease forwards':''}">${st>=s?'⭐':'☆'}</span>`).join('')}</div>`;if(ok)c.onclick=()=>startLesson(l.id);g.appendChild(c)})}
+
+let currentLesson=null,currentStep=0,quizState={},playbackTimer=null;
+function startLesson(id){currentLesson=LESSONS.find(l=>l.id===id);currentStep=0;quizState={};document.getElementById('lessonViewTitle').textContent=`Lesson ${currentLesson.id}: ${currentLesson.title}`;showScreen('lesson');renderStep()}
+function renderStep(){
+  const bar=document.getElementById('lessonProgressBar');
+  bar.innerHTML=STEP_NAMES.map((s,i)=>`<div class="lesson-step-pip"><div class="pip ${i<currentStep?'done':''} ${i===currentStep?'active':''}"></div><div class="pip-label ${i<currentStep?'done':''} ${i===currentStep?'active':''}">${s}</div></div>`).join('');
+  const btn=document.getElementById('nextStepBtn');
+  btn.style.display=currentStep<=TOTAL_STEPS?'':'none';
+  btn.textContent=currentStep===4?'🎉 Complete Lesson!':'Next →';
+  if(currentStep===3)btn.style.display='none';
+  const area=document.getElementById('activityArea');area.innerHTML='';stopPlayback();
+  switch(currentStep){case 0:renderExplore(area);break;case 1:renderSongActivity(area,currentLesson.song);break;case 2:renderReadNotes(area);break;case 3:renderQuiz(area);break;case 4:renderShowtime(area);break;case 5:renderCompletion(area);break}
+}
+function nextStep(){if(currentStep===4){completeLesson();currentStep=5}else{currentStep++;awardStepStar()}renderStep()}
+function awardStepStar(){const id=currentLesson.id;const c=userProgress.lessonStars[id]||0;if(currentStep<=TOTAL_STEPS&&c<currentStep){userProgress.lessonStars[id]=currentStep;userProgress.totalStars=Object.values(userProgress.lessonStars).reduce((a,b)=>a+b,0);saveProgress()}}
+async function completeLesson(){const id=currentLesson.id;if(!userProgress.lessonsCompleted.includes(id))userProgress.lessonsCompleted.push(id);userProgress.lessonStars[id]=TOTAL_STEPS;userProgress.totalStars=Object.values(userProgress.lessonStars).reduce((a,b)=>a+b,0);const bm={1:'lesson1',2:'lesson2',3:'lesson3',4:'lesson4',5:'lesson5',6:'lesson6',7:'lesson7',8:'lesson8'};if(bm[id]&&!userProgress.badges.includes(bm[id]))userProgress.badges.push(bm[id]);await saveProgress();renderHome();renderBadges()}
+function exitLesson(){stopPlayback();showScreen('home');renderHome()}
+
+function renderExplore(area){const e=currentLesson.explore;area.innerHTML=`<div class="activity-title">${e.title}</div><div class="activity-desc">${e.desc}</div><div class="piano-container"><div class="piano" id="explorePiano"></div></div>`;buildPiano('explorePiano',e.highlightNotes,e.fingerLabels)}
+
+function buildPiano(cid,hl=[],fl={},sl=true){const c=document.getElementById(cid);if(!c)return;c.innerHTML='';
+[{n:'C4',b:0},{n:'C#4',b:1},{n:'D4',b:0},{n:'D#4',b:1},{n:'E4',b:0},{n:'F4',b:0},{n:'F#4',b:1},{n:'G4',b:0},{n:'G#4',b:1},{n:'A4',b:0},{n:'A#4',b:1},{n:'B4',b:0},{n:'C5',b:0},{n:'C#5',b:1},{n:'D5',b:0},{n:'D#5',b:1},{n:'E5',b:0}].forEach(k=>{
+const el=document.createElement('div');const lt=gl(k.n);const co=gc(k.n);const ih=hl.includes(k.n);
+el.className=`piano-key ${k.b?'black':'white'} ${ih?'highlight':''}`;el.style.setProperty('--key-color',co);el.dataset.note=k.n;
+let h='';if(sl&&!k.b){const f=fl&&fl[k.n]?`<div style="font-size:.6rem;color:${co}">${fl[k.n]}</div>`:'';h=`${f}<div class="color-dot" style="background:${ih?co:'transparent'}"></div><div class="note-label" style="color:${ih?co:'#999'}">${lt}</div>`}
+el.innerHTML=h;
+el.onmousedown=el.ontouchstart=e=>{e.preventDefault();ensureAudio();el.classList.add('active');playNote(k.n,.5);if(!userProgress.firstNote){userProgress.firstNote=true;if(!userProgress.badges.includes('first_note')){userProgress.badges.push('first_note');saveProgress();renderBadges()}}};
+el.onmouseup=el.onmouseleave=el.ontouchend=()=>el.classList.remove('active');c.appendChild(el)})}
+
+// ===== SONG STAFF (visual, scrolling) =====
+function drawSongStaff(containerId, notes, currentIdx=-1){
+  const wrap=document.getElementById(containerId);if(!wrap)return;
+  const realNotes=notes.filter(n=>n!=='_');
+  const uniqueNotes=[...new Set(realNotes)];
+  // Map note indices (skip rests)
+  let notePositions=[];let ni=0;
+  notes.forEach((n,i)=>{if(n!=='_'){notePositions.push({note:n,songIdx:i,seqIdx:ni});ni++}});
+
+  const noteW=36;const padding=50;const w=padding+notePositions.length*noteW+padding;
+  const staffTop=30;const lineGap=12;const h=staffTop+lineGap*4+40;
+
+  function noteY(name){const yi=SYM[name];if(yi===undefined)return staffTop+4*lineGap;return staffTop+4*lineGap-(yi-2)*(lineGap/2)}
+
+  let svg=`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="min-width:${w}px;height:${h}px">`;
+  // Staff lines
+  for(let i=0;i<5;i++){const y=staffTop+i*lineGap;svg+=`<line x1="30" y1="${y}" x2="${w-20}" y2="${y}" stroke="rgba(255,255,255,.25)" stroke-width="1"/>`}
+  // Treble clef
+  svg+=`<text x="6" y="${staffTop+lineGap*3}" font-size="38" fill="rgba(255,255,255,.4)" font-family="serif" style="font-style:italic">𝄞</text>`;
+
+  // Notes
+  notePositions.forEach((np,i)=>{
+    const x=padding+i*noteW;
+    const y=noteY(np.note);
+    const color=gc(np.note);const letter=gb(np.note);
+    const isCur=np.songIdx===currentIdx;
+    const isPlayed=currentIdx>=0&&np.songIdx<currentIdx;
+    const op=isCur?1:isPlayed?.25:.65;
+    const sz=isCur?1.15:1;
+    // Ledger line for C4
+    if(np.note==='C4')svg+=`<line x1="${x-10}" y1="${y}" x2="${x+10}" y2="${y}" stroke="rgba(255,255,255,${op*.5})" stroke-width="1"/>`;
+    svg+=`<g style="opacity:${op}">`;
+    svg+=`<ellipse cx="${x}" cy="${y}" rx="${8*sz}" ry="${6*sz}" fill="${color}" stroke="${isCur?'white':color}" stroke-width="${isCur?2:0.5}"/>`;
+    svg+=`<text x="${x}" y="${y+3.5}" text-anchor="middle" font-size="7" font-weight="800" fill="${isCur?'white':'rgba(0,0,0,.6)'}" font-family="Fredoka,sans-serif">${letter}</text>`;
+    svg+=`<line x1="${x+7*sz}" y1="${y}" x2="${x+7*sz}" y2="${y-22}" stroke="${color}" stroke-width="1.5" opacity="${op}"/>`;
+    svg+=`</g>`;
+  });
+  svg+=`</svg>`;
+  wrap.innerHTML=svg;
+
+  // Auto-scroll to current note
+  if(currentIdx>=0){
+    let ci=notePositions.findIndex(np=>np.songIdx===currentIdx);
+    if(ci>=0){const scrollX=Math.max(0,padding+ci*noteW-wrap.clientWidth/2);wrap.scrollTo({left:scrollX,behavior:'smooth'})}
+  }
+}
+
+// ===== SONG PLAYBACK =====
+let playbackState={playing:false,index:0,notes:[],durations:[],tempo:1,faded:false,staffId:null};
+
+function renderSongActivity(area,songData){
+  const faded=songData.faded||false;
+  area.innerHTML=`
+    <div class="activity-title">${songData.title||songData.name}</div>
+    <div class="activity-desc">${songData.desc||'Follow the colored notes and play along!'}</div>
+    <div class="song-player">
+      <div class="song-staff-wrap" id="songStaffWrap"></div>
+      <div class="note-display" id="noteDisplay"></div>
+      <div class="piano-container"><div class="piano" id="songPiano"></div></div>
+      <div class="tempo-control"><span>🐢</span><label>Tempo</label><input type="range" class="tempo-slider" id="tempoSlider" min="0.4" max="1.8" step="0.1" value="${faded?'0.8':'1'}"><span>🐇</span></div>
+      <div class="player-controls"><button class="btn btn-secondary btn-small" onclick="restartPlayback()">⏮ Restart</button><button class="btn btn-primary btn-small" id="playPauseBtn" onclick="togglePlayback()">▶ Play</button></div>
+    </div>`;
+  buildPiano('songPiano',[...new Set(songData.notes.filter(n=>n!=='_'))]);
+  renderNoteBlocks(songData.notes,faded);
+  drawSongStaff('songStaffWrap',songData.notes);
+  playbackState={playing:false,index:0,notes:songData.notes,durations:songData.durations,tempo:faded?.8:1,faded,staffId:'songStaffWrap'};
+  document.getElementById('tempoSlider').oninput=e=>{playbackState.tempo=parseFloat(e.target.value)};
+}
+
+function renderNoteBlocks(notes,faded=false){const d=document.getElementById('noteDisplay');if(!d)return;d.innerHTML='';notes.forEach((n,i)=>{if(n==='_'){const s=document.createElement('div');s.style.cssText='width:12px;height:42px';d.appendChild(s);return}const b=document.createElement('div');const c=gc(n);b.className=`note-block ${i===0?'current':'upcoming'}`;b.style.background=faded?c+'33':c+'dd';b.style.color=faded?c+'88':'white';b.textContent=gl(n);b.dataset.idx=i;d.appendChild(b)})}
+
+function togglePlayback(){if(playbackState.playing)stopPlayback();else{playbackState.playing=true;document.getElementById('playPauseBtn').textContent='⏸ Pause';advancePlayback()}}
+function advancePlayback(){
+  if(!playbackState.playing)return;
+  const{notes,durations,tempo}=playbackState;
+  if(playbackState.index>=notes.length){stopPlayback();return}
+  const note=notes[playbackState.index];const dur=durations[playbackState.index]||1;
+  document.querySelectorAll('.note-block').forEach(b=>{const idx=parseInt(b.dataset.idx);b.className=idx<playbackState.index?'note-block played':idx===playbackState.index?'note-block current':'note-block upcoming'});
+  document.querySelectorAll('.piano-key.active').forEach(k=>k.classList.remove('active'));
+  if(note!=='_'){playNote(note,dur/tempo*.8);const k=document.querySelector(`.piano-key[data-note="${note}"]`);if(k){k.classList.add('active');setTimeout(()=>k.classList.remove('active'),dur/tempo*800)}}
+  // Update staff
+  if(playbackState.staffId)drawSongStaff(playbackState.staffId,notes,playbackState.index);
+  playbackState.index++;
+  playbackTimer=setTimeout(()=>advancePlayback(),dur/tempo*600);
+}
+function stopPlayback(){playbackState.playing=false;if(playbackTimer)clearTimeout(playbackTimer);playbackTimer=null;const b=document.getElementById('playPauseBtn');if(b)b.textContent='▶ Play'}
+function restartPlayback(){stopPlayback();playbackState.index=0;renderNoteBlocks(playbackState.notes,playbackState.faded);if(playbackState.staffId)drawSongStaff(playbackState.staffId,playbackState.notes);document.querySelectorAll('.piano-key.active').forEach(k=>k.classList.remove('active'))}
+
+// ===== READ NOTES =====
+function renderReadNotes(area){
+  const rn=currentLesson.readNotes;
+  area.innerHTML=`<div class="activity-title">${rn.title}</div><div class="activity-desc">${rn.desc}</div>
+    <div class="staff-container"><svg id="staffSvg" class="staff-svg" viewBox="0 0 500 180" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="staff-note-cards" id="staffNoteCards"></div>
+    <div id="staffTeachText" style="text-align:center;color:var(--text2);font-size:.95rem;max-width:480px;line-height:1.6;min-height:50px"></div></div>`;
+  drawStaff('staffSvg',rn.notes);buildNoteCards(rn.notes,rn.teachText);
+  if(!userProgress.badges.includes('note_reader')){userProgress.badges.push('note_reader');saveProgress();renderBadges()}
+}
+function drawStaff(svgId,notesToShow,activeNote=null){
+  const svg=document.getElementById(svgId);if(!svg)return;
+  const sT=50,lG=14,sL=60,sR=480;let h='';
+  h+=`<rect x="0" y="0" width="500" height="180" fill="transparent"/>`;
+  for(let i=0;i<5;i++){const y=sT+i*lG;h+=`<line x1="${sL}" y1="${y}" x2="${sR}" y2="${y}" stroke="rgba(255,255,255,.35)" stroke-width="1.5"/>`}
+  h+=`<text x="20" y="${sT+lG*3.2}" font-size="56" fill="rgba(255,255,255,.6)" font-family="serif" style="font-style:italic">𝄞</text>`;
+  function nY(n){const yi=SYM[n];if(yi===undefined)return sT+4*lG;return sT+4*lG-(yi-2)*(lG/2)}
+  const ns=(sR-sL-40)/Math.max(notesToShow.length-1,1);const sx=sL+30;
+  notesToShow.forEach((note,i)=>{const x=sx+i*ns;const y=nY(note);const color=gc(note);const letter=gb(note);const isA=note===activeNote;const op=activeNote?(isA?1:.25):.7;const sc=isA?1.2:1;
+    if(note==='C4')h+=`<line x1="${x-14}" y1="${y}" x2="${x+14}" y2="${y}" stroke="rgba(255,255,255,${isA?.6:.3})" stroke-width="1.5"/>`;
+    h+=`<g style="opacity:${op};transform-origin:${x}px ${y}px;transform:scale(${sc});transition:all .4s">`;
+    h+=`<ellipse cx="${x}" cy="${y}" rx="10" ry="7" fill="${color}" stroke="${isA?'white':color}" stroke-width="${isA?2:1}"/>`;
+    h+=`<text x="${x}" y="${y+4}" text-anchor="middle" font-size="9" font-weight="800" fill="${isA?'white':'rgba(0,0,0,.7)'}" font-family="Fredoka,sans-serif">${letter}</text>`;
+    h+=`<line x1="${x+9}" y1="${y}" x2="${x+9}" y2="${y-30}" stroke="${color}" stroke-width="2" opacity="${op}"/>`;
+    h+=`</g>`;
+    h+=`<text x="${x}" y="${sT+4*lG+28}" text-anchor="middle" font-size="12" font-weight="700" fill="${color}" font-family="Fredoka,sans-serif" opacity="${op}">${note}</text>`});
+  h+=`<text x="${sR+5}" y="${sT-8}" font-size="7" fill="rgba(255,255,255,.3)" font-family="Nunito,sans-serif" font-weight="600">Lines:</text>`;
+  h+=`<text x="${sR+5}" y="${sT+2}" font-size="7" fill="rgba(255,255,255,.25)" font-family="Nunito,sans-serif">E G B D F</text>`;
+  svg.innerHTML=h}
+
+function buildNoteCards(notes,texts){const c=document.getElementById('staffNoteCards');if(!c)return;c.innerHTML='';const t=document.getElementById('staffTeachText');
+  notes.forEach((note,i)=>{const color=gc(note);const letter=gb(note);const info=SNI[note]||{};const card=document.createElement('div');card.className='staff-note-card';
+    card.innerHTML=`<div class="sn-letter" style="color:${color}">${letter}</div><div class="sn-label">${note}</div><div class="sn-label">${info.pos||''}</div>`;
+    card.onclick=()=>{c.querySelectorAll('.staff-note-card').forEach(x=>x.classList.remove('active'));card.classList.add('active');playNote(note,.6);drawStaff('staffSvg',notes,note);if(t&&texts[i])t.innerHTML=texts[i]};c.appendChild(card)});
+  if(t&&texts[0])t.innerHTML=texts[0];setTimeout(()=>{const f=c.querySelector('.staff-note-card');if(f)f.click()},300)}
+
+// ===== QUIZ =====
+function renderQuiz(area){const q=currentLesson.quiz;quizState={questions:q.questions,current:0,correct:0,answered:false};area.innerHTML=`<div class="activity-title">${q.title}</div><div class="activity-desc">${q.desc}</div><div class="quiz-area" id="quizArea"></div>`;renderQuizQ()}
+function renderQuizQ(){const qa=document.getElementById('quizArea');const q=quizState.questions[quizState.current];
+  if(!q){const p=quizState.correct===quizState.questions.length;if(p&&!userProgress.quizPerfect.includes(currentLesson.id)){userProgress.quizPerfect.push(currentLesson.id);if(!userProgress.badges.includes('perfectquiz'))userProgress.badges.push('perfectquiz');saveProgress();renderBadges()}qa.innerHTML=`<div style="font-size:3rem;margin-bottom:16px">${p?'🎉':'👏'}</div><div class="quiz-question">${p?'Perfect score! Amazing ears!':`You got ${quizState.correct}/${quizState.questions.length}! Great job!`}</div><button class="btn btn-primary" onclick="quizDone()">Continue →</button>`;return}
+  quizState.answered=false;
+  const label=q.label?`<div style="font-size:1.1rem;color:var(--accent2);margin-bottom:12px;font-weight:700">${q.label}</div>`:'';
+  const hasTwo=!!q.play2;
+  qa.innerHTML=`<div class="quiz-question">${hasTwo?'🔊 Listen to these two notes...':'🔊 Listen carefully... what note is this?'}</div>${label}<button class="btn btn-secondary btn-small" onclick="playQuizNote()" style="margin-bottom:16px">🔊 Play Again</button><div class="quiz-options" id="quizOptions">${q.options.map(o=>`<div class="quiz-option" onclick="answerQuiz('${o}')">${o}</div>`).join('')}</div><div class="quiz-feedback" id="quizFeedback"></div>`;
+  setTimeout(()=>playQuizNote(),500)}
+function playQuizNote(){const q=quizState.questions[quizState.current];if(!q)return;playNote(q.play,.8);if(q.play2)setTimeout(()=>playNote(q.play2,.8),600)}
+function answerQuiz(ch){if(quizState.answered)return;quizState.answered=true;const q=quizState.questions[quizState.current];const ok=ch===q.answer;if(ok)quizState.correct++;document.querySelectorAll('.quiz-option').forEach(o=>{if(o.textContent===q.answer)o.classList.add('correct');else if(o.textContent===ch&&!ok)o.classList.add('wrong')});const fb=document.getElementById('quizFeedback');fb.textContent=ok?'✅ Correct!':'❌ It was '+q.answer;fb.style.color=ok?'var(--success)':'#e74c3c';setTimeout(()=>{quizState.current++;renderQuizQ()},1500)}
+function quizDone(){awardStepStar();currentStep=4;document.getElementById('nextStepBtn').style.display='';renderStep()}
+
+function renderShowtime(area){renderSongActivity(area,currentLesson.showtime)}
+function renderCompletion(area){area.innerHTML=`<div class="completion-screen"><div class="big-star">🌟</div><h2>Lesson ${currentLesson.id} Complete!</h2><p style="color:var(--text2);font-size:1.1rem;margin:12px 0">Amazing work! You've earned all 5 stars!</p><div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="startLesson(${currentLesson.id})">🔄 Replay</button><button class="btn btn-primary" onclick="exitLesson()">🏠 Back to Lessons</button></div></div>`;document.getElementById('nextStepBtn').style.display='none'}
+
+// ===== SONG LIBRARY =====
+function renderSongLibrary(){const g=document.getElementById('songGrid');g.innerHTML='';SONG_LIBRARY.forEach(s=>{const c=document.createElement('div');c.className='song-card';c.innerHTML=`<h3>${s.name}</h3><div class="difficulty">${'⭐'.repeat(s.difficulty)}${'☆'.repeat(3-s.difficulty)}</div><div class="song-notes">Notes: ${s.notesUsed}</div>`;c.onclick=()=>openSongPlayer(s);g.appendChild(c)})}
+
+function openSongPlayer(song){
+  document.getElementById('songPlayerTitle').textContent=song.name;
+  const area=document.getElementById('songPlayerArea');
+  area.innerHTML=`<div class="activity-area">
+    <div class="activity-title">🎵 ${song.name}</div>
+    <div class="activity-desc">Follow the colored notes on the staff and keyboard!</div>
+    <div class="song-player">
+      <div class="song-staff-wrap" id="libStaffWrap"></div>
+      <div class="note-display" id="noteDisplay"></div>
+      <div class="piano-container"><div class="piano" id="songPiano"></div></div>
+      <div class="tempo-control"><span>🐢</span><label>Tempo</label><input type="range" class="tempo-slider" id="tempoSlider" min="0.4" max="1.8" step="0.1" value="1"><span>🐇</span></div>
+      <div class="player-controls"><button class="btn btn-secondary btn-small" onclick="restartPlayback()">⏮ Restart</button><button class="btn btn-primary btn-small" id="playPauseBtn" onclick="togglePlayback()">▶ Play</button></div>
+    </div></div>`;
+  buildPiano('songPiano',[...new Set(song.notes.filter(n=>n!=='_'))]);
+  renderNoteBlocks(song.notes,false);
+  drawSongStaff('libStaffWrap',song.notes);
+  playbackState={playing:false,index:0,notes:song.notes,durations:song.durations,tempo:1,faded:false,staffId:'libStaffWrap'};
+  document.getElementById('tempoSlider').oninput=e=>{playbackState.tempo=parseFloat(e.target.value)};
+  if(!userProgress.songsPlayed.includes(song.id)){userProgress.songsPlayed.push(song.id);if(userProgress.songsPlayed.length>=3&&!userProgress.badges.includes('song_explorer')){userProgress.badges.push('song_explorer');renderBadges()}saveProgress()}
+  showScreen('songplayer')}
+function exitSongPlayer(){stopPlayback();showScreen('library')}
+
+function renderBadges(){const g=document.getElementById('badgesGrid');if(!g)return;g.innerHTML='';BADGES.forEach(b=>{const e=userProgress.badges&&userProgress.badges.includes(b.id);const c=document.createElement('div');c.className=`badge-card ${e?'earned':'locked'}`;c.innerHTML=`<div class="badge-icon">${e?b.icon:'🔒'}</div><div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div>`;g.appendChild(c)})}
+
+init();
+</script>
+</body>
+</html>
