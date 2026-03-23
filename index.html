@@ -206,8 +206,11 @@ const SNI={
 };
 
 const AVATARS=['🎹','🎵','🎶','🎸','🥁','🎺','🎻','🦄','🌟','🦋','🐱','🐶','🎨','🌈','🚀','🍕'];
-async function loadData(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):null}catch{return null}}
-async function saveData(k,v){try{await window.storage.set(k,JSON.stringify(v))}catch(e){console.error(e)}}
+// ===== IndexedDB Storage =====
+const DB_NAME='PianoAdventureDB';const DB_VERSION=1;const STORE_NAME='appdata';
+function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(STORE_NAME))db.createObjectStore(STORE_NAME)};req.onsuccess=e=>resolve(e.target.result);req.onerror=e=>reject(e.target.error)})}
+async function loadData(k){try{const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE_NAME,'readonly');const store=tx.objectStore(STORE_NAME);const req=store.get(k);req.onsuccess=()=>resolve(req.result!==undefined?req.result:null);req.onerror=()=>resolve(null)})}catch{return null}}
+async function saveData(k,v){try{const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE_NAME,'readwrite');const store=tx.objectStore(STORE_NAME);store.put(v,k);tx.oncomplete=()=>resolve(true);tx.onerror=e=>{console.error('Save error',e);resolve(false)}})}catch(e){console.error(e)}}
 
 let currentUser=null,allProfiles=[],userProgress={};
 const STEP_NAMES=['Explore','Play','Read Notes','Quiz','Show Time!'];
