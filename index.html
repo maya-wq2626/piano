@@ -17,7 +17,7 @@ html{touch-action:manipulation}
   --success:#2ecc71;--glow:rgba(255,107,157,0.3);
 }
 html,body{height:100%;overflow:hidden}
-body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);overscroll-behavior:none}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 @keyframes starPop{0%{transform:scale(0) rotate(-30deg);opacity:0}60%{transform:scale(1.3) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
@@ -25,7 +25,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
 @keyframes glow{0%,100%{box-shadow:0 0 5px var(--glow)}50%{box-shadow:0 0 25px var(--glow),0 0 50px var(--glow)}}
 @keyframes noteFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.5)}}
 @keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
-#app{height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);position:relative;overflow:hidden}
+#app{min-height:100vh;height:100vh;display:flex;flex-direction:column;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);position:relative;overflow:hidden}
 #app::before{content:'';position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,rgba(255,255,255,.3),transparent),radial-gradient(2px 2px at 40% 70%,rgba(255,255,255,.2),transparent),radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.4),transparent),radial-gradient(2px 2px at 80% 50%,rgba(255,255,255,.15),transparent),radial-gradient(1px 1px at 10% 80%,rgba(255,255,255,.3),transparent),radial-gradient(1px 1px at 90% 10%,rgba(255,255,255,.25),transparent);pointer-events:none;z-index:0}
 #app>*{position:relative;z-index:1}
 .header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;background:rgba(35,26,84,.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0}
@@ -38,10 +38,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
 .nav-btn{flex:1;padding:10px 16px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .3s;background:transparent;color:var(--text2)}
 .nav-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
 .nav-btn.active{background:linear-gradient(135deg,rgba(255,107,157,.2),rgba(255,217,61,.1));color:var(--accent);border:1px solid rgba(255,107,157,.3)}
-.main{flex:1;overflow-y:auto;padding:20px 24px}
+.main{flex:1;overflow-y:auto;padding:20px 24px 100px 24px;-webkit-overflow-scrolling:touch}
 .main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-track{background:transparent}.main::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 .screen{display:none}.screen.active{display:block;animation:fadeIn .4s ease}
-.login-screen{display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);flex-direction:column;align-items:center;justify-content:center}
+.login-screen{display:none;position:fixed;inset:0;z-index:100;background:linear-gradient(135deg,var(--bg) 0%,var(--bg2) 50%,#12082e 100%);flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;padding:30px 16px;-webkit-overflow-scrolling:touch}
 .login-screen.active{display:flex}
 .login-title{font-family:'Fredoka',sans-serif;font-size:2.8rem;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent));background-size:200% auto;animation:shimmer 3s linear infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .login-subtitle{color:var(--text2);font-size:1.1rem;margin-bottom:40px}
@@ -101,8 +101,8 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
 .piano-key.highlight.white{box-shadow:inset 0 -4px 0 var(--key-color),0 0 15px var(--key-color)}
 .song-player{text-align:center}
 .note-display{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0;min-height:50px;align-items:center}
-.note-block{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Fredoka',sans-serif;font-size:.85rem;transition:all .3s;opacity:.4;transform:scale(.9)}
-.note-block.played{opacity:.3;transform:scale(.8)}.note-block.current{opacity:1;transform:scale(1.2);box-shadow:0 0 20px currentColor;animation:pulse .8s ease infinite}.note-block.upcoming{opacity:.6;transform:scale(1)}
+.note-block{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:'Fredoka',sans-serif;font-size:.85rem;transition:all .3s;opacity:1;transform:scale(1);border:2px solid transparent}
+.note-block.played{opacity:.25;transform:scale(.85);filter:grayscale(.5)}.note-block.current{transform:scale(1.25);border:3px solid white;box-shadow:0 0 25px currentColor,0 0 50px currentColor;animation:pulse .8s ease infinite}.note-block.upcoming{opacity:1;transform:scale(1)}
 .tempo-control{display:flex;align-items:center;gap:12px;justify-content:center;margin:12px 0}
 .tempo-control label{font-size:.85rem;color:var(--text2);font-weight:600}
 .tempo-slider{-webkit-appearance:none;width:200px;height:6px;border-radius:3px;background:rgba(255,255,255,.1);outline:none}
@@ -139,6 +139,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
 .staff-note-card .sn-label{font-size:.75rem;color:var(--text2)}
 .staff-note-card.active{border-color:var(--accent);box-shadow:0 0 15px var(--glow)}
 .float-note{position:fixed;pointer-events:none;font-size:1.5rem;z-index:999;animation:noteFloat 1.2s ease forwards}
+.next-btn-bar{position:sticky;bottom:0;text-align:center;padding:14px 0 10px;background:linear-gradient(to top,var(--bg2) 60%,transparent);z-index:10;margin-top:12px}
 /* Tablet portrait & smaller laptops */
 @media(max-width:900px){
   .header{padding:10px 20px}.header h1{font-size:1.3rem}
@@ -161,7 +162,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
   .header-user .avatar{font-size:1.2rem}.header-user .name{font-size:.8rem}
   .nav{padding:6px 12px;gap:3px}
   .nav-btn{padding:8px 8px;font-size:.78rem;border-radius:10px}
-  .main{padding:12px 10px}
+  .main{padding:12px 10px 90px 10px}
   .activity-area{padding:14px;border-radius:14px;min-height:auto}
   .activity-title{font-size:1.1rem}
   .activity-desc{font-size:.85rem;margin-bottom:14px}
@@ -196,7 +197,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
   .header-stars{font-size:.75rem;gap:4px}
   .header-user .name{display:none}
   .nav-btn{padding:7px 6px;font-size:.72rem}
-  .main{padding:10px 8px}
+  .main{padding:10px 8px 80px 8px}
   .activity-area{padding:12px 10px}
   .activity-title{font-size:1rem;gap:6px}
   .activity-desc{font-size:.8rem;margin-bottom:10px;line-height:1.5}
@@ -276,7 +277,7 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text)}
       <div class="lesson-header"><button class="back-btn" onclick="exitLesson()">← Back</button><div style="flex:1;font-family:'Fredoka',sans-serif;font-size:1.2rem" id="lessonViewTitle"></div></div>
       <div class="lesson-progress-bar" id="lessonProgressBar"></div>
       <div class="activity-area" id="activityArea"></div>
-      <div style="text-align:center;margin-top:16px"><button class="btn btn-primary" id="nextStepBtn" onclick="nextStep()">Next →</button></div>
+      <div class="next-btn-bar"><button class="btn btn-primary" id="nextStepBtn" onclick="nextStep()">Next →</button></div>
     </div>
     <div class="screen" id="screen-library"><div class="section-title">🎵 Song Library</div><div class="song-grid" id="songGrid"></div></div>
     <div class="screen" id="screen-songplayer">
@@ -387,6 +388,42 @@ readNotes:{title:'📖 Read Notes: Reading a Full Melody',desc:"Now let's see Ji
 teachText:["<b>C</b> — on the ledger line. Jingle Bells starts higher but comes back to C.","<b>D</b> — below the staff. Appears near the end of phrases.","<b>E</b> — first line. The STAR of this song! E-E-E is the main pattern.","<b>F</b> — first space. Shows up in the second half.","<b>G</b> — second line. The big jump from E to G gives the song energy!"]},
 quiz:{title:'🧩 Quiz: Master Challenge!',desc:"A mix of everything you've learned!",questions:[{play:'E4',options:['D','E','F'],answer:'E'},{play:'G4',options:['F','G','A'],answer:'G'},{play:'C4',play2:'E4',options:['Step','Skip'],answer:'Skip'},{play:'F4',options:['E','F','G'],answer:'F'},{play:'D4',play2:'E4',options:['Step','Skip'],answer:'Step'}]},
 showtime:{title:'🎤 Show Time!',desc:"Play Jingle Bells for everyone! Perfect for any time of year! 🔔🎉",name:'Jingle Bells',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 9: Bigger Jumps =====
+{id:9,title:'Bigger Jumps',desc:'Learn to jump across more keys — and play Happy Birthday!',notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+explore:{title:'🎹 Explore: Jumping Around!',desc:"So far you've mostly played steps and small skips. Now let's try BIGGER jumps! Try playing C then F (that's a jump of 3!), or C then G (a jump of 4!). In Happy Birthday, you'll need to jump from C all the way up to high C — that's a big leap! Practice jumping between these notes.",highlightNotes:['C4','D4','E4','F4','G4','A4','B4','C5']},
+song:{title:'🎵 Play: Happy Birthday',desc:"Everyone's favorite celebration song! Watch for the big jump up to high C in the middle — it's the exciting part! Take it slow at first.",name:'Happy Birthday',notes:['C4','C4','D4','C4','F4','E4','_','C4','C4','D4','C4','G4','F4','_','C4','C4','C5','A4','F4','E4','D4','_','B4','B4','A4','F4','G4','F4'],durations:[.75,.25,1,1,1,2,1,.75,.25,1,1,1,2,1,.75,.25,1,1,1,1,2,1,.75,.25,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Seeing Big Jumps on the Staff',desc:"When notes jump far apart on the staff, your eyes need to move quickly! A big gap between notes on the staff = a big jump on the piano. Let's see the notes from Happy Birthday.",notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+teachText:["<b>C4</b> — Middle C on its ledger line. The song starts here.","<b>D</b> — one step up from C.","<b>E</b> — first line. Appears as a landing note.","<b>F</b> — first space. The song lands here a lot!","<b>G</b> — second line. Another landing spot.","<b>A</b> — second space. Part of the big climbing section!","<b>B</b> — third line. Almost at the top!","<b>High C</b> — third space. The HIGHEST note in the song — the big dramatic moment!"]},
+quiz:{title:'🧩 Quiz: How Far Apart?',desc:"Can you tell if these notes are close together or far apart?",questions:[{play:'C4',play2:'F4',options:['Step','Small skip','Big jump'],answer:'Big jump'},{play:'E4',play2:'F4',options:['Step','Small skip','Big jump'],answer:'Step'},{play:'C4',play2:'C5',options:['Step','Small skip','Big jump'],answer:'Big jump'},{play:'A4',play2:'B4',options:['Step','Small skip','Big jump'],answer:'Step'},{play:'F4',play2:'A4',options:['Step','Small skip','Big jump'],answer:'Small skip'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Happy Birthday! Now you can play this for anyone's birthday — what an amazing gift! 🎂🎉",name:'Happy Birthday',notes:['C4','C4','D4','C4','F4','E4','_','C4','C4','D4','C4','G4','F4','_','C4','C4','C5','A4','F4','E4','D4','_','B4','B4','A4','F4','G4','F4'],durations:[.75,.25,1,1,1,2,1,.75,.25,1,1,1,2,1,.75,.25,1,1,1,1,2,1,.75,.25,1,1,1,2],faded:true}
+},
+// ===== LESSON 10: Repeated Notes & Patterns =====
+{id:10,title:'Patterns & Repeats',desc:'Spot musical patterns and play When the Saints Go Marching In!',notes:['C4','D4','E4','F4','G4'],
+explore:{title:'🎹 Explore: Musical Patterns',desc:"Great musicians spot patterns! Many songs repeat the same group of notes over and over. In 'When the Saints', the pattern C-E-F-G repeats several times. Try playing C-E-F-G a few times in a row — see how it becomes easier each time? That's the power of patterns!",highlightNotes:['C4','D4','E4','F4','G4']},
+song:{title:'🎵 Play: When the Saints Go Marching In',desc:"This song has a strong, marching feel! Listen for the C-E-F-G pattern that keeps coming back. Once you spot it, the song becomes much easier!",name:'When the Saints Go Marching In',notes:['C4','E4','F4','G4','_','C4','E4','F4','G4','_','C4','E4','F4','G4','E4','C4','E4','D4','_','E4','E4','D4','C4','C4','E4','G4','G4','F4','_','E4','F4','G4','E4','C4','D4','C4'],durations:[1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Spotting Patterns on the Staff',desc:"On the staff, repeated patterns look the same! When you see the same shape appear again, you already know how to play it. Let's look at the C-E-F-G pattern.",notes:['C4','E4','F4','G4'],
+teachText:["<b>C</b> — on the ledger line. The pattern starts here each time.","<b>E</b> — jumps up to the first line. A skip from C!","<b>F</b> — first space. A step up from E.","<b>G</b> — second line. Another step up. This 4-note shape repeats throughout the song!"]},
+quiz:{title:'🧩 Quiz: Pattern Spotter!',desc:"Can you recognize what comes next in the pattern?",questions:[{play:'C4',options:['D comes next','E comes next','F comes next'],answer:'E comes next',label:'Pattern: C → ?'},{play:'E4',options:['F comes next','G comes next','D comes next'],answer:'F comes next',label:'Pattern: C → E → ?'},{play:'F4',options:['E comes next','G comes next','A comes next'],answer:'G comes next',label:'Pattern: C → E → F → ?'},{play:'G4',options:['F','G','A'],answer:'G'},{play:'C4',play2:'E4',options:['Step','Skip'],answer:'Skip'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play When the Saints Go Marching In! This is a real marching band classic — feel the energy! 🎺🥁",name:'When the Saints Go Marching In',notes:['C4','E4','F4','G4','_','C4','E4','F4','G4','_','C4','E4','F4','G4','E4','C4','E4','D4','_','E4','E4','D4','C4','C4','E4','G4','G4','F4','_','E4','F4','G4','E4','C4','D4','C4'],durations:[1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 11: Dynamics & Expression =====
+{id:11,title:'Play with Feeling!',desc:'Learn to play softly and loudly — make music come alive!',notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+explore:{title:'🎹 Explore: Loud & Soft',desc:"Music isn't just about the RIGHT notes — it's about HOW you play them! Try playing C softly (barely press the key) then LOUDLY (press firmly). In music, <b>piano</b> (p) means soft and <b>forte</b> (f) means loud. Yes — the instrument is named after playing softly! Try playing the scale from C to C, starting soft and getting louder.",highlightNotes:['C4','D4','E4','F4','G4','A4','B4','C5']},
+song:{title:'🎵 Play: Twinkle Twinkle with Feeling',desc:"You already know this song — now play it with expression! Start the first line gently, play the middle section a bit louder, then get soft again at the end. Feel the difference!",name:'Twinkle Twinkle (Expressive)',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+readNotes:{title:'📖 Read Notes: Expression Marks',desc:"Real sheet music has special marks that tell you HOW to play! <b>p</b> = piano (soft), <b>f</b> = forte (loud), <b>mf</b> = mezzo-forte (medium loud), <b>crescendo</b> (‹) = gradually get louder, <b>decrescendo</b> (›) = gradually get softer.",notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+teachText:["<b>C</b> — Start here softly (piano). Imagine whispering the note.","<b>D</b> — A tiny bit louder. Building up...","<b>E</b> — Getting to medium volume (mezzo-forte).","<b>F</b> — A bit more! This is called crescendo — getting louder.","<b>G</b> — Nice and strong now.","<b>A</b> — Even stronger! Almost at the top.","<b>B</b> — Nearly there — play with confidence!","<b>High C</b> — FORTE! Play this one loud and proud! Then try going back down getting softer."]},
+quiz:{title:'🧩 Quiz: Music Terms!',desc:"Let's learn some Italian music words!",questions:[{play:'C4',options:['Soft','Loud','Fast'],answer:'Soft',label:'What does "piano" (p) mean?'},{play:'G4',options:['Soft','Loud','Slow'],answer:'Loud',label:'What does "forte" (f) mean?'},{play:'E4',options:['Get louder','Get softer','Stay same'],answer:'Get louder',label:'What does "crescendo" mean?'},{play:'A4',options:['Get louder','Get softer','Speed up'],answer:'Get softer',label:'What does "decrescendo" mean?'},{play:'F4',options:['Medium loud','Very soft','Very loud'],answer:'Medium loud',label:'What does "mezzo-forte" (mf) mean?'}]},
+showtime:{title:'🎤 Show Time!',desc:"Play Twinkle Twinkle with FEELING! Start soft, build up in the middle, and end softly. Show your family the difference! ✨🎶",name:'Twinkle Twinkle (Expressive)',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2],faded:true}
+},
+// ===== LESSON 12: Graduation! =====
+{id:12,title:'Graduation! 🎓',desc:'The grand finale — show everything you\'ve learned!',notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+explore:{title:'🎹 Explore: Your Musical Journey!',desc:"WOW — look how far you've come! You started with just 3 notes and now you know the full octave, can read the staff, understand rhythm, and play with expression! Do a victory lap — play every note from C to high C and back down. You're a real musician now!",highlightNotes:['C4','D4','E4','F4','G4','A4','B4','C5']},
+song:{title:'🎵 Play: Für Elise (Simplified)',desc:"For your graduation, here's a simplified version of one of the most famous piano pieces ever written — by Beethoven! It's a bit trickier, but you're ready. Take it slow and enjoy every note.",name:'Für Elise (Simplified)',notes:['E5','D#4','E5','D#4','E5','B4','D5','C5','A4','_','C4','E4','A4','B4','_','E4','G#4','B4','C5'],durations:[.5,.5,.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,1,1,.5,.5,.5,1]},
+readNotes:{title:'📖 Read Notes: Everything You Know!',desc:"Let's do a final review of the full staff — from Middle C all the way up. You can now read music! Lines: <b>Every Good Boy Does Fine</b>. Spaces: <b>F-A-C-E</b>. Middle C on its ledger line. You've got it all!",notes:['C4','D4','E4','F4','G4','A4','B4','C5'],
+teachText:["<b>Middle C</b> — ledger line. Where it all began in Lesson 1!","<b>D</b> — below the staff. Your second note ever!","<b>E</b> — first line. <b>E</b>very Good Boy Does Fine.","<b>F</b> — first space. <b>F</b>-A-C-E.","<b>G</b> — second line. Every <b>G</b>ood Boy Does Fine.","<b>A</b> — second space. F-<b>A</b>-C-E.","<b>B</b> — third line. Every Good <b>B</b>oy Does Fine.","<b>High C</b> — third space. F-A-<b>C</b>-E. The top of your octave!"]},
+quiz:{title:'🧩 Final Quiz: The Ultimate Challenge!',desc:"The big one! A mix of everything — notes, steps & skips, rhythm, and music terms!",questions:[{play:'B4',options:['A','B','C'],answer:'B'},{play:'C4',play2:'G4',options:['Step','Small skip','Big jump'],answer:'Big jump'},{play:'F4',options:['E','F','G'],answer:'F',label:'What note is in the first space?'},{play:'E4',options:['Soft','Loud','Medium loud'],answer:'Soft',label:'What does "piano" mean?'},{play:'A4',play2:'B4',options:['Step','Skip'],answer:'Step'},{play:'C5',options:['Low C','High C','B'],answer:'High C'}]},
+showtime:{title:'🎤🎓 GRADUATION PERFORMANCE!',desc:"This is it — your graduation concert! Play Für Elise for your family and take a BIG bow! You started as a beginner and now you're a real piano player. We are SO proud of you! 🌟🎉🎹",name:'Für Elise (Simplified)',notes:['E5','D#4','E5','D#4','E5','B4','D5','C5','A4','_','C4','E4','A4','B4','_','E4','G#4','B4','C5'],durations:[.5,.5,.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,1,1,.5,.5,.5,1],faded:true}
 }
 ];
 
@@ -414,6 +451,10 @@ const BADGES=[
 {id:'lesson6',name:'Clef Reader',icon:'𝄞',desc:'Met the treble clef'},
 {id:'lesson7',name:'Rhythm Keeper',icon:'🥁',desc:'Learned rhythm basics'},
 {id:'lesson8',name:'Music Maker',icon:'🎹',desc:'Put it all together'},
+{id:'lesson9',name:'Big Jumper',icon:'🦘',desc:'Mastered big jumps'},
+{id:'lesson10',name:'Pattern Spotter',icon:'🔍',desc:'Can spot musical patterns'},
+{id:'lesson11',name:'Expressive Player',icon:'🎭',desc:'Plays with feeling'},
+{id:'lesson12',name:'🎓 Graduate!',icon:'🎓',desc:'Completed all 12 lessons!'},
 {id:'note_reader',name:'Note Reader',icon:'📖',desc:'Completed a Read Notes activity'},
 {id:'song_explorer',name:'Song Explorer',icon:'🎶',desc:'Played 3 library songs'},
 {id:'perfectquiz',name:'Perfect Score',icon:'💯',desc:'Got all quiz answers right'},
@@ -448,7 +489,7 @@ function renderStep(){
 }
 function nextStep(){if(currentStep===4){completeLesson();currentStep=5}else{currentStep++;awardStepStar()}renderStep()}
 function awardStepStar(){const id=currentLesson.id;const c=userProgress.lessonStars[id]||0;if(currentStep<=TOTAL_STEPS&&c<currentStep){userProgress.lessonStars[id]=currentStep;userProgress.totalStars=Object.values(userProgress.lessonStars).reduce((a,b)=>a+b,0);saveProgress()}}
-async function completeLesson(){const id=currentLesson.id;if(!userProgress.lessonsCompleted.includes(id))userProgress.lessonsCompleted.push(id);userProgress.lessonStars[id]=TOTAL_STEPS;userProgress.totalStars=Object.values(userProgress.lessonStars).reduce((a,b)=>a+b,0);const bm={1:'lesson1',2:'lesson2',3:'lesson3',4:'lesson4',5:'lesson5',6:'lesson6',7:'lesson7',8:'lesson8'};if(bm[id]&&!userProgress.badges.includes(bm[id]))userProgress.badges.push(bm[id]);await saveProgress();renderHome();renderBadges()}
+async function completeLesson(){const id=currentLesson.id;if(!userProgress.lessonsCompleted.includes(id))userProgress.lessonsCompleted.push(id);userProgress.lessonStars[id]=TOTAL_STEPS;userProgress.totalStars=Object.values(userProgress.lessonStars).reduce((a,b)=>a+b,0);const bm={1:'lesson1',2:'lesson2',3:'lesson3',4:'lesson4',5:'lesson5',6:'lesson6',7:'lesson7',8:'lesson8',9:'lesson9',10:'lesson10',11:'lesson11',12:'lesson12'};if(bm[id]&&!userProgress.badges.includes(bm[id]))userProgress.badges.push(bm[id]);await saveProgress();renderHome();renderBadges()}
 function exitLesson(){stopPlayback();showScreen('home');renderHome()}
 
 function renderExplore(area){const e=currentLesson.explore;area.innerHTML=`<div class="activity-title">${e.title}</div><div class="activity-desc">${e.desc}</div><div class="piano-container"><div class="piano" id="explorePiano"></div></div>`;buildPiano('explorePiano',e.highlightNotes,e.fingerLabels)}
@@ -531,7 +572,7 @@ function renderSongActivity(area,songData){
   document.getElementById('tempoSlider').oninput=e=>{playbackState.tempo=parseFloat(e.target.value)};
 }
 
-function renderNoteBlocks(notes,faded=false){const d=document.getElementById('noteDisplay');if(!d)return;d.innerHTML='';notes.forEach((n,i)=>{if(n==='_'){const s=document.createElement('div');s.style.cssText='width:12px;height:42px';d.appendChild(s);return}const b=document.createElement('div');const c=gc(n);b.className=`note-block ${i===0?'current':'upcoming'}`;b.style.background=faded?c+'33':c+'dd';b.style.color=faded?c+'88':'white';b.textContent=gl(n);b.dataset.idx=i;d.appendChild(b)})}
+function renderNoteBlocks(notes,faded=false){const d=document.getElementById('noteDisplay');if(!d)return;d.innerHTML='';notes.forEach((n,i)=>{if(n==='_'){const s=document.createElement('div');s.style.cssText='width:12px;height:42px';d.appendChild(s);return}const b=document.createElement('div');const c=gc(n);b.className=`note-block ${i===0?'current':'upcoming'}`;b.style.background=faded?c+'aa':c+'dd';b.style.color='white';b.textContent=gl(n);b.dataset.idx=i;d.appendChild(b)})}
 
 function togglePlayback(){if(playbackState.playing)stopPlayback();else{playbackState.playing=true;document.getElementById('playPauseBtn').textContent='⏸ Pause';advancePlayback()}}
 function advancePlayback(){
@@ -600,7 +641,14 @@ function answerQuiz(ch){if(quizState.answered)return;quizState.answered=true;con
 function quizDone(){awardStepStar();currentStep=4;document.getElementById('nextStepBtn').style.display='';renderStep()}
 
 function renderShowtime(area){renderSongActivity(area,currentLesson.showtime)}
-function renderCompletion(area){area.innerHTML=`<div class="completion-screen"><div class="big-star">🌟</div><h2>Lesson ${currentLesson.id} Complete!</h2><p style="color:var(--text2);font-size:1.1rem;margin:12px 0">Amazing work! You've earned all 5 stars!</p><div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="startLesson(${currentLesson.id})">🔄 Replay</button><button class="btn btn-primary" onclick="exitLesson()">🏠 Back to Lessons</button></div></div>`;document.getElementById('nextStepBtn').style.display='none'}
+function renderCompletion(area){
+  const isGrad=currentLesson.id===12;
+  if(isGrad){
+    area.innerHTML=`<div class="completion-screen"><div class="big-star">🎓</div><h2>YOU GRADUATED!</h2><p style="color:var(--text2);font-size:1.1rem;margin:12px 0;max-width:500px;line-height:1.7">You completed all 12 lessons! You can read notes on the staff, understand rhythm, play with expression, and perform real songs. You're not a beginner anymore — you're a <b style="color:var(--accent2)">real piano player!</b></p><p style="font-size:1.5rem;margin:16px 0">🌟⭐🎹🎵🎶🏆⭐🌟</p><p style="color:var(--text2);font-size:.95rem">Keep practicing with the Song Library — and remember, every great pianist started exactly where you did!</p><div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="showScreen('library')">🎵 Song Library</button><button class="btn btn-primary" onclick="exitLesson()">🏠 Back to Lessons</button></div></div>`;
+  } else {
+    area.innerHTML=`<div class="completion-screen"><div class="big-star">🌟</div><h2>Lesson ${currentLesson.id} Complete!</h2><p style="color:var(--text2);font-size:1.1rem;margin:12px 0">Amazing work! You've earned all 5 stars!</p><div style="display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="startLesson(${currentLesson.id})">🔄 Replay</button><button class="btn btn-primary" onclick="exitLesson()">🏠 Back to Lessons</button></div></div>`;
+  }
+  document.getElementById('nextStepBtn').style.display='none'}
 
 // ===== SONG LIBRARY =====
 function renderSongLibrary(){const g=document.getElementById('songGrid');g.innerHTML='';SONG_LIBRARY.forEach(s=>{const c=document.createElement('div');c.className='song-card';c.innerHTML=`<h3>${s.name}</h3><div class="difficulty">${'⭐'.repeat(s.difficulty)}${'☆'.repeat(3-s.difficulty)}</div><div class="song-notes">Notes: ${s.notesUsed}</div>`;c.onclick=()=>openSongPlayer(s);g.appendChild(c)})}
