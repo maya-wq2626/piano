@@ -124,6 +124,10 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);over
 .song-card:hover{transform:translateY(-3px);border-color:rgba(255,107,157,.3);box-shadow:0 6px 20px rgba(0,0,0,.3)}
 .song-card h3{font-family:'Fredoka',sans-serif;font-size:1.05rem;margin-bottom:4px}
 .song-card .difficulty{font-size:.85rem;margin-bottom:6px}.song-card .song-notes{font-size:.8rem;color:var(--text2)}
+.song-card .song-cat{font-size:.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.filter-btn{background:rgba(255,255,255,.05);color:var(--text2);border:1px solid rgba(255,255,255,.1)}
+.filter-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+.filter-btn.active{background:linear-gradient(135deg,rgba(255,107,157,.2),rgba(255,217,61,.1));color:var(--accent);border-color:rgba(255,107,157,.3)}
 .badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
 .badge-card{display:flex;flex-direction:column;align-items:center;gap:8px;padding:20px;border-radius:14px;background:var(--card);border:1px solid rgba(255,255,255,.05);text-align:center}
 .badge-card.earned{border-color:rgba(255,217,61,.3)}.badge-card.locked{opacity:.35}
@@ -279,12 +283,50 @@ body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);over
       <div class="activity-area" id="activityArea"></div>
       <div class="next-btn-bar"><button class="btn btn-primary" id="nextStepBtn" onclick="nextStep()">Next →</button></div>
     </div>
-    <div class="screen" id="screen-library"><div class="section-title">🎵 Song Library</div><div class="song-grid" id="songGrid"></div></div>
+    <div class="screen" id="screen-library">
+      <div class="section-title">🎵 Song Library</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="btn btn-small filter-btn active" onclick="filterSongs('all')">All</button>
+        <button class="btn btn-small filter-btn" onclick="filterSongs('beginner')">⭐ Beginner</button>
+        <button class="btn btn-small filter-btn" onclick="filterSongs('folk')">🏡 Folk</button>
+        <button class="btn btn-small filter-btn" onclick="filterSongs('classical')">🎻 Classical</button>
+        <button class="btn btn-small filter-btn" onclick="filterSongs('holiday')">🎄 Holiday</button>
+        <button class="btn btn-primary btn-small" onclick="showScreen('mysongs')" style="margin-left:auto">✏️ My Songs</button>
+      </div>
+      <div class="song-grid" id="songGrid"></div>
+    </div>
     <div class="screen" id="screen-songplayer">
       <div class="lesson-header"><button class="back-btn" onclick="exitSongPlayer()">← Back</button><div style="flex:1;font-family:'Fredoka',sans-serif;font-size:1.2rem" id="songPlayerTitle"></div></div>
       <div id="songPlayerArea"></div>
     </div>
     <div class="screen" id="screen-badges"><div class="section-title">🏆 Your Badges</div><div class="badges-grid" id="badgesGrid"></div></div>
+    <div class="screen" id="screen-mysongs">
+      <div class="lesson-header"><button class="back-btn" onclick="showScreen('library')">← Back to Songs</button><div style="flex:1;font-family:'Fredoka',sans-serif;font-size:1.2rem">✏️ My Songs</div></div>
+      <div class="activity-area" style="margin-bottom:16px">
+        <div class="activity-title">🎵 Create a New Song</div>
+        <div class="activity-desc">Type note names separated by spaces. Use C D E F G A B (add 4 or 5 for octave, e.g. C4 D4 E5). Use <b>_</b> for rests. Default octave is 4.</div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:.85rem;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Song Name:</label>
+          <input type="text" id="customSongName" placeholder="My awesome song..." style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none" maxlength="50">
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:.85rem;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Notes (e.g. C4 D4 E4 _ E4 D4 C4):</label>
+          <textarea id="customSongNotes" placeholder="C4 D4 E4 F4 G4 _ G4 F4 E4 D4 C4" style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none;resize:vertical;min-height:80px" rows="3"></textarea>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:.85rem;color:var(--text2);font-weight:600;display:block;margin-bottom:6px">Note Length (beats per note, default 1):</label>
+          <input type="number" id="customSongBeat" value="1" min="0.25" max="4" step="0.25" style="width:100px;padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:var(--text);font-family:'Nunito',sans-serif;font-size:.95rem;outline:none">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-small" onclick="previewCustomSong()">👀 Preview</button>
+          <button class="btn btn-primary btn-small" onclick="saveCustomSong()">💾 Save Song</button>
+        </div>
+        <div id="customPreviewArea" style="margin-top:16px"></div>
+      </div>
+      <div class="section-title" style="margin-top:20px">📂 Your Saved Songs</div>
+      <div class="song-grid" id="mySongGrid"></div>
+      <div id="noCustomSongs" style="text-align:center;color:var(--text2);padding:20px;font-size:.95rem">No custom songs yet — create one above!</div>
+    </div>
   </div>
 </div>
 <script>
@@ -474,16 +516,35 @@ showtime:{title:'🎤 Show Time!',desc:"The ULTIMATE performance! Play Twinkle T
 
 // ===== SONG LIBRARY =====
 const SONG_LIBRARY=[
-{id:'hcb',name:'Hot Cross Buns',difficulty:1,notesUsed:'C D E',notes:['E4','D4','C4','_','E4','D4','C4','_','C4','C4','D4','D4','E4','D4','C4'],durations:[1,1,2,1,1,1,2,1,.5,.5,.5,.5,1,1,2]},
-{id:'mary',name:'Mary Had a Little Lamb',difficulty:1,notesUsed:'C D E G',notes:['E4','D4','C4','D4','E4','E4','E4','_','D4','D4','D4','_','E4','G4','G4','_','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2]},
-{id:'twinkle',name:'Twinkle Twinkle Little Star',difficulty:2,notesUsed:'C D E F G A',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
-{id:'ode',name:'Ode to Joy',difficulty:2,notesUsed:'C D E F G',notes:['E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','E4','D4','D4','_','E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','D4','C4','C4'],durations:[1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2]},
-{id:'london',name:'London Bridge',difficulty:1,notesUsed:'C D E F G A',notes:['G4','A4','G4','F4','E4','F4','G4','_','D4','E4','F4','_','E4','F4','G4','_','G4','A4','G4','F4','E4','F4','G4','_','D4','G4','E4','C4'],durations:[1.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1.5,.5,1,1,1,1,2,1,1,1,1,2]},
-{id:'row',name:'Row Row Row Your Boat',difficulty:1,notesUsed:'C D E F G',notes:['C4','C4','C4','D4','E4','_','E4','D4','E4','F4','G4','_','C5','C5','C5','G4','G4','G4','E4','E4','E4','C4','C4','C4','G4','F4','E4','D4','C4'],durations:[1,1,.75,.25,1,1,.75,.25,.75,.25,2,1,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,1,1,1,1,2]},
-{id:'happy',name:'Happy Birthday',difficulty:2,notesUsed:'C D E F G A B',notes:['C4','C4','D4','C4','F4','E4','_','C4','C4','D4','C4','G4','F4','_','C4','C4','C5','A4','F4','E4','D4','_','B4','B4','A4','F4','G4','F4'],durations:[.75,.25,1,1,1,2,1,.75,.25,1,1,1,2,1,.75,.25,1,1,1,1,2,1,.75,.25,1,1,1,2]},
-{id:'jingle',name:'Jingle Bells',difficulty:2,notesUsed:'C D E F G',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2]},
-{id:'saints',name:'When the Saints Go Marching In',difficulty:2,notesUsed:'C D E F G',notes:['C4','E4','F4','G4','_','C4','E4','F4','G4','_','C4','E4','F4','G4','E4','C4','E4','D4','_','E4','E4','D4','C4','C4','E4','G4','G4','F4','_','E4','F4','G4','E4','C4','D4','C4'],durations:[1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
-{id:'furelise',name:'Für Elise (Simplified)',difficulty:3,notesUsed:'C D E G# A B',notes:['E5','D#4','E5','D#4','E5','B4','D5','C5','A4','_','C4','E4','A4','B4','_','E4','G#4','B4','C5'],durations:[.5,.5,.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,1,1,.5,.5,.5,1]},
+// Beginner
+{id:'hcb',name:'Hot Cross Buns',difficulty:1,notesUsed:'C D E',cat:'beginner',notes:['E4','D4','C4','_','E4','D4','C4','_','C4','C4','D4','D4','E4','D4','C4'],durations:[1,1,2,1,1,1,2,1,.5,.5,.5,.5,1,1,2]},
+{id:'mary',name:'Mary Had a Little Lamb',difficulty:1,notesUsed:'C D E G',cat:'beginner',notes:['E4','D4','C4','D4','E4','E4','E4','_','D4','D4','D4','_','E4','G4','G4','_','E4','D4','C4','D4','E4','E4','E4','E4','D4','D4','E4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,2]},
+{id:'twinkle',name:'Twinkle Twinkle Little Star',difficulty:2,notesUsed:'C D E F G A',cat:'beginner',notes:['C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4','_','G4','G4','F4','F4','E4','E4','D4','_','G4','G4','F4','F4','E4','E4','D4','_','C4','C4','G4','G4','A4','A4','G4','_','F4','F4','E4','E4','D4','D4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+{id:'row',name:'Row Row Row Your Boat',difficulty:1,notesUsed:'C D E F G',cat:'beginner',notes:['C4','C4','C4','D4','E4','_','E4','D4','E4','F4','G4','_','C5','C5','C5','G4','G4','G4','E4','E4','E4','C4','C4','C4','G4','F4','E4','D4','C4'],durations:[1,1,.75,.25,1,1,.75,.25,.75,.25,2,1,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,.5,1,1,1,1,2]},
+{id:'thisold',name:'This Old Man',difficulty:1,notesUsed:'C D E F G A',cat:'beginner',notes:['G4','E4','G4','_','A4','G4','E4','_','C4','D4','E4','F4','G4','_','G4','G4','G4','G4','F4','E4','D4','_','C4','E4','G4','G4','F4','E4','D4','_','C4','D4','E4','F4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,.5,.5,.5,.5,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,2]},
+// Folk
+{id:'london',name:'London Bridge',difficulty:1,notesUsed:'C D E F G A',cat:'folk',notes:['G4','A4','G4','F4','E4','F4','G4','_','D4','E4','F4','_','E4','F4','G4','_','G4','A4','G4','F4','E4','F4','G4','_','D4','G4','E4','C4'],durations:[1.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1.5,.5,1,1,1,1,2,1,1,1,1,2]},
+{id:'yankee',name:'Yankee Doodle',difficulty:2,notesUsed:'C D E F G A B',cat:'folk',notes:['C4','C4','D4','E4','C4','E4','D4','_','C4','C4','D4','E4','C4','B4','_','C4','C4','D4','E4','F4','E4','D4','C4','B4','G4','A4','B4','C4','C4'],durations:[1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2]},
+{id:'ohsusanna',name:'Oh Susanna',difficulty:2,notesUsed:'C D E F G A',cat:'folk',notes:['C4','D4','E4','G4','G4','A4','G4','E4','C4','D4','E4','E4','D4','C4','D4','_','C4','D4','E4','G4','G4','A4','G4','E4','C4','D4','E4','E4','D4','D4','C4'],durations:[.5,.5,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2,1,.5,.5,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2]},
+{id:'camp',name:'Camptown Races',difficulty:2,notesUsed:'C D E F G A',cat:'folk',notes:['G4','G4','E4','G4','A4','G4','E4','_','E4','D4','E4','D4','E4','G4','_','G4','G4','E4','G4','A4','G4','E4','_','E4','D4','E4','D4','C4'],durations:[1,.5,.5,1,1,1,2,1,.5,.5,.5,.5,1,2,1,1,.5,.5,1,1,1,2,1,.5,.5,.5,.5,2]},
+{id:'scarborough',name:'Scarborough Fair',difficulty:2,notesUsed:'C D E F G A',cat:'folk',notes:['A4','A4','E4','A4','_','G4','A4','B4','_','A4','G4','E4','_','D4','E4','_','A4','A4','G4','F4','E4','_','D4','C4','D4','_','A4'],durations:[1,1,1,2,1,1,1,2,1,1,1,2,1,1,2,1,1,1,1,2,1,1,1,2,1,1,2]},
+{id:'greensleeves',name:'Greensleeves',difficulty:3,notesUsed:'C D E F G A B',cat:'folk',notes:['A4','C5','D5','E5','D5','C5','B4','G4','A4','B4','C5','B4','A4','_','A4','C5','D5','E5','D5','C5','B4','G4','G4','A4','B4','A4'],durations:[1,1,1,1.5,.5,1,1,1,1,1,1,1.5,.5,2,1,1,1,1.5,.5,1,1,1,.5,.5,1,2]},
+{id:'auld',name:'Auld Lang Syne',difficulty:2,notesUsed:'C D E F G A',cat:'folk',notes:['C4','F4','F4','F4','A4','G4','F4','G4','A4','F4','F4','A4','C5','_','D5','C5','A4','F4','A4','G4','F4','G4','A4','F4','D4','D4','C4'],durations:[.5,1,1,.5,1,1,.5,.5,1,1,.5,1,2,.5,1,.5,.5,1,1,.5,.5,1,1,.5,1,1,2]},
+{id:'amazing',name:'Amazing Grace',difficulty:2,notesUsed:'C D E F G A',cat:'folk',notes:['C4','F4','A4','F4','A4','G4','F4','D4','C4','C4','F4','A4','F4','A4','G4','_','A4','C5','A4','F4','C4','D4','F4','F4','D4','C4'],durations:[1,1,.5,.5,1,1,1,1,1,1,1,.5,.5,1,2,1,.5,.5,1,1,1,1,1,1,1,2]},
+// Classical
+{id:'ode',name:'Ode to Joy',difficulty:2,notesUsed:'C D E F G',cat:'classical',notes:['E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','E4','D4','D4','_','E4','E4','F4','G4','G4','F4','E4','D4','C4','C4','D4','E4','D4','C4','C4'],durations:[1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1.5,.5,2]},
+{id:'furelise',name:'Für Elise (Simplified)',difficulty:3,notesUsed:'C D E G# A B',cat:'classical',notes:['E5','D#4','E5','D#4','E5','B4','D5','C5','A4','_','C4','E4','A4','B4','_','E4','G#4','B4','C5'],durations:[.5,.5,.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,1,1,.5,.5,.5,1]},
+{id:'cancan',name:'Can Can',difficulty:2,notesUsed:'C D E F G A B',cat:'classical',notes:['C4','C4','D4','E4','D4','C4','G4','E4','D4','C4','D4','E4','C4','_','C4','C4','D4','E4','D4','C4','A4','G4','F4','E4','D4','C4'],durations:[.5,.5,.5,.5,.5,.5,1,1,.5,.5,.5,.5,1,1,.5,.5,.5,.5,.5,.5,1,.5,.5,.5,.5,2]},
+{id:'beethoven5',name:"Beethoven's 5th (Theme)",difficulty:2,notesUsed:'D E F G',cat:'classical',notes:['G4','G4','G4','E4','_','F4','F4','F4','D4','_','G4','G4','G4','E4','_','G4','G4','G4','D4'],durations:[.5,.5,.5,2,1,.5,.5,.5,2,1,.5,.5,.5,1,1,.5,.5,.5,2]},
+{id:'brahms',name:"Brahms' Lullaby",difficulty:2,notesUsed:'C D E F G A',cat:'classical',notes:['E4','E4','G4','_','E4','E4','G4','_','E4','G4','C5','B4','A4','_','F4','F4','A4','_','F4','A4','B4','A4','G4','_','E4','E4','G4'],durations:[.5,.5,2,1,.5,.5,2,1,.5,.5,1,1,2,1,.5,.5,2,1,.5,.5,1,1,2,1,.5,.5,2]},
+{id:'swanlake',name:'Swan Lake Theme',difficulty:3,notesUsed:'C D E F G A B',cat:'classical',notes:['A4','B4','C5','D5','E5','C5','E5','_','D5','B4','D5','_','C5','A4','C5','_','B4','G4','B4','_','A4'],durations:[.5,.5,1,1,1,1,2,1,1,1,2,1,1,1,2,1,1,1,2,1,2]},
+{id:'pachelbel',name:"Pachelbel's Canon (Simple)",difficulty:2,notesUsed:'C D E F G A B',cat:'classical',notes:['E5','D5','C5','B4','A4','G4','A4','B4','_','C5','B4','A4','G4','F4','E4','F4','G4','_','A4','G4','F4','E4','D4','C4','D4','E4'],durations:[1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2]},
+// Holiday
+{id:'happy',name:'Happy Birthday',difficulty:2,notesUsed:'C D E F G A B',cat:'holiday',notes:['C4','C4','D4','C4','F4','E4','_','C4','C4','D4','C4','G4','F4','_','C4','C4','C5','A4','F4','E4','D4','_','B4','B4','A4','F4','G4','F4'],durations:[.75,.25,1,1,1,2,1,.75,.25,1,1,1,2,1,.75,.25,1,1,1,1,2,1,.75,.25,1,1,1,2]},
+{id:'jingle',name:'Jingle Bells',difficulty:2,notesUsed:'C D E F G',cat:'holiday',notes:['E4','E4','E4','_','E4','E4','E4','_','E4','G4','C4','D4','E4','_','F4','F4','F4','F4','F4','E4','E4','E4','E4','D4','D4','E4','D4','G4'],durations:[1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,.5,.5,1,1,.5,.5,1,1,1,1,2]},
+{id:'saints',name:'When the Saints Go Marching In',difficulty:2,notesUsed:'C D E F G',cat:'holiday',notes:['C4','E4','F4','G4','_','C4','E4','F4','G4','_','C4','E4','F4','G4','E4','C4','E4','D4','_','E4','E4','D4','C4','C4','E4','G4','G4','F4','_','E4','F4','G4','E4','C4','D4','C4'],durations:[1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,2]},
+{id:'silent',name:'Silent Night',difficulty:2,notesUsed:'C D E F G A',cat:'holiday',notes:['G4','A4','G4','E4','_','G4','A4','G4','E4','_','D5','D5','B4','_','C5','C5','G4','_','A4','A4','C5','B4','A4','G4','A4','G4','E4','_','A4','A4','C5','B4','A4','G4','A4','G4','E4'],durations:[1.5,.5,1,2,1,1.5,.5,1,2,1,1,1,2,1,1,1,2,1,1,1,1.5,.5,1,1.5,.5,1,2,1,1,1,1.5,.5,1,1.5,.5,1,2]},
+{id:'joy',name:'Joy to the World',difficulty:2,notesUsed:'C D E F G A B',cat:'holiday',notes:['C5','B4','A4','G4','_','F4','E4','D4','C4','_','G4','A4','_','A4','B4','_','B4','C5','_','C5','C5','B4','A4','G4','G4','F4','E4','_','C5','C5','B4','A4','G4','G4','F4','E4'],durations:[1,1,.5,.5,2,1,1,.5,.5,2,1,2,1,1,2,1,1,2,1,.5,.5,.5,.5,1,.5,.5,2,1,.5,.5,.5,.5,1,.5,.5,2]},
 ];
 
 const BADGES=[
@@ -517,7 +578,7 @@ function renderLogin(){const el=document.getElementById('profileList');el.innerH
 function renderAvatarPicker(){const el=document.getElementById('avatarPicker');el.innerHTML='';AVATARS.forEach(a=>{const o=document.createElement('span');o.className='avatar-option';o.textContent=a;o.onclick=()=>{el.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));o.classList.add('selected')};el.appendChild(o)})}
 function toggleNewProfile(s){document.getElementById('newProfileForm').classList.toggle('active',s);if(s)document.getElementById('newName').focus()}
 async function createProfile(){const n=document.getElementById('newName').value.trim();const s=document.querySelector('.avatar-option.selected');if(!n)return;allProfiles.push({name:n,avatar:s?s.textContent:'🎹',created:Date.now()});await saveData('piano-profiles',allProfiles);document.getElementById('newName').value='';document.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));toggleNewProfile(false);renderLogin();loginAs(allProfiles.length-1)}
-async function loginAs(i){currentUser=allProfiles[i];currentUser._idx=i;userProgress=(await loadData(`piano-progress-${i}`))||{lessonsCompleted:[],lessonStars:{},badges:[],totalStars:0,songsPlayed:[],quizPerfect:[],firstNote:false};document.getElementById('loginScreen').classList.remove('active');document.getElementById('appHeader').style.display='';document.getElementById('appNav').style.display='';document.getElementById('appMain').style.display='';document.getElementById('headerAvatar').textContent=currentUser.avatar;document.getElementById('headerName').textContent=currentUser.name;updateStars();renderHome();renderSongLibrary();renderBadges();showScreen('home')}
+async function loginAs(i){currentUser=allProfiles[i];currentUser._idx=i;userProgress=(await loadData(`piano-progress-${i}`))||{lessonsCompleted:[],lessonStars:{},badges:[],totalStars:0,songsPlayed:[],quizPerfect:[],firstNote:false};document.getElementById('loginScreen').classList.remove('active');document.getElementById('appHeader').style.display='';document.getElementById('appNav').style.display='';document.getElementById('appMain').style.display='';document.getElementById('headerAvatar').textContent=currentUser.avatar;document.getElementById('headerName').textContent=currentUser.name;updateStars();renderHome();renderSongLibrary();renderBadges();loadCustomSongs();showScreen('home')}
 function logout(){currentUser=null;document.getElementById('loginScreen').classList.add('active');document.getElementById('appHeader').style.display='none';document.getElementById('appNav').style.display='none';document.getElementById('appMain').style.display='none';renderLogin()}
 async function saveProgress(){if(currentUser)await saveData(`piano-progress-${currentUser._idx}`,userProgress);updateStars()}
 function updateStars(){document.getElementById('headerStars').textContent=`⭐ ${userProgress.totalStars||0}`}
@@ -706,7 +767,116 @@ function renderCompletion(area){
   document.getElementById('nextStepBtn').style.display='none'}
 
 // ===== SONG LIBRARY =====
-function renderSongLibrary(){const g=document.getElementById('songGrid');g.innerHTML='';SONG_LIBRARY.forEach(s=>{const c=document.createElement('div');c.className='song-card';c.innerHTML=`<h3>${s.name}</h3><div class="difficulty">${'⭐'.repeat(s.difficulty)}${'☆'.repeat(3-s.difficulty)}</div><div class="song-notes">Notes: ${s.notesUsed}</div>`;c.onclick=()=>openSongPlayer(s);g.appendChild(c)})}
+let currentFilter='all';
+function filterSongs(cat){
+  currentFilter=cat;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent.toLowerCase().includes(cat==='all'?'all':cat)));
+  renderSongLibrary();
+}
+function renderSongLibrary(){
+  const g=document.getElementById('songGrid');g.innerHTML='';
+  const songs=currentFilter==='all'?SONG_LIBRARY:SONG_LIBRARY.filter(s=>s.cat===currentFilter);
+  const catLabels={beginner:'⭐ Beginner',folk:'🏡 Folk',classical:'🎻 Classical',holiday:'🎄 Holiday'};
+  songs.forEach(s=>{const c=document.createElement('div');c.className='song-card';
+    c.innerHTML=`<div class="song-cat">${catLabels[s.cat]||s.cat}</div><h3>${s.name}</h3><div class="difficulty">${'⭐'.repeat(s.difficulty)}${'☆'.repeat(3-s.difficulty)}</div><div class="song-notes">Notes: ${s.notesUsed}</div>`;
+    c.onclick=()=>openSongPlayer(s);g.appendChild(c)});
+  if(songs.length===0)g.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px">No songs in this category yet!</div>';
+}
+
+// ===== CUSTOM SONG BUILDER =====
+let customSongs=[];
+async function loadCustomSongs(){customSongs=(await loadData('piano-custom-songs'))||[];renderMySongs()}
+async function saveCustomSongs(){await saveData('piano-custom-songs',customSongs);renderMySongs()}
+
+function parseNoteInput(input){
+  const tokens=input.trim().split(/\s+/);
+  const notes=[];
+  tokens.forEach(t=>{
+    if(t==='_'||t==='-'||t==='r'||t==='R'){notes.push('_');return}
+    let n=t.toUpperCase();
+    // Add default octave if missing
+    if(!n.match(/\d/)){
+      if(n.length===1||n.length===2&&n.includes('#'))n+='4';
+    }
+    // Validate
+    if(n==='_'||NOTE_FREQS[n]||n.match(/^[A-G]#?\d$/)){notes.push(n)}
+  });
+  return notes;
+}
+
+function previewCustomSong(){
+  const name=document.getElementById('customSongName').value.trim()||'Untitled Song';
+  const input=document.getElementById('customSongNotes').value;
+  const beat=parseFloat(document.getElementById('customSongBeat').value)||1;
+  const notes=parseNoteInput(input);
+  if(notes.length===0){document.getElementById('customPreviewArea').innerHTML='<div style="color:#e74c3c;font-weight:600">Please enter some notes! Example: C4 D4 E4 F4 G4</div>';return}
+  const durations=notes.map(n=>n==='_'?1:beat);
+  const realNotes=notes.filter(n=>n!=='_');
+  const notesUsed=[...new Set(realNotes.map(n=>n.replace(/\d/,'')))].join(' ');
+  const song={id:'preview',name,difficulty:2,notesUsed,cat:'custom',notes,durations};
+  // Show inline preview
+  const area=document.getElementById('customPreviewArea');
+  area.innerHTML=`<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:16px">
+    <div style="font-family:'Fredoka',sans-serif;font-size:1.1rem;margin-bottom:8px">Preview: ${name}</div>
+    <div style="font-size:.85rem;color:var(--text2);margin-bottom:12px">Notes: ${notesUsed} · ${realNotes.length} notes</div>
+    <div class="song-staff-wrap" id="previewStaff"></div>
+    <div class="note-display" id="noteDisplay"></div>
+    <div class="piano-container"><div class="piano" id="songPiano"></div></div>
+    <div class="tempo-control"><span>🐢</span><label>Tempo</label><input type="range" class="tempo-slider" id="tempoSlider" min="0.4" max="1.8" step="0.1" value="1"><span>🐇</span></div>
+    <div class="player-controls"><button class="btn btn-secondary btn-small" onclick="restartPlayback()">⏮ Restart</button><button class="btn btn-primary btn-small" id="playPauseBtn" onclick="togglePlayback()">▶ Play</button></div>
+  </div>`;
+  buildPiano('songPiano',[...new Set(realNotes)]);
+  renderNoteBlocks(notes,false);
+  drawSongStaff('previewStaff',notes);
+  playbackState={playing:false,index:0,notes,durations,tempo:1,faded:false,staffId:'previewStaff'};
+  document.getElementById('tempoSlider').oninput=e=>{playbackState.tempo=parseFloat(e.target.value)};
+}
+
+function saveCustomSong(){
+  const name=document.getElementById('customSongName').value.trim();
+  const input=document.getElementById('customSongNotes').value;
+  const beat=parseFloat(document.getElementById('customSongBeat').value)||1;
+  if(!name){alert('Please enter a song name!');return}
+  const notes=parseNoteInput(input);
+  if(notes.length===0){alert('Please enter some notes!');return}
+  const durations=notes.map(n=>n==='_'?1:beat);
+  const realNotes=notes.filter(n=>n!=='_');
+  const notesUsed=[...new Set(realNotes.map(n=>n.replace(/\d/,'')))].join(' ');
+  const song={id:'custom_'+Date.now(),name,difficulty:2,notesUsed,cat:'custom',notes,durations,rawInput:input,beat};
+  customSongs.push(song);
+  saveCustomSongs();
+  document.getElementById('customSongName').value='';
+  document.getElementById('customSongNotes').value='';
+  document.getElementById('customPreviewArea').innerHTML='<div style="color:var(--success);font-weight:700;font-size:1.1rem;padding:10px">✅ Song saved!</div>';
+}
+
+function renderMySongs(){
+  const g=document.getElementById('mySongGrid');
+  const empty=document.getElementById('noCustomSongs');
+  if(!g)return;
+  g.innerHTML='';
+  if(customSongs.length===0){if(empty)empty.style.display='';return}
+  if(empty)empty.style.display='none';
+  customSongs.forEach((s,i)=>{
+    const c=document.createElement('div');c.className='song-card';
+    c.innerHTML=`<div class="song-cat">✏️ My Song</div><h3>${s.name}</h3><div class="song-notes">Notes: ${s.notesUsed}</div>
+      <div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-small btn-secondary" onclick="event.stopPropagation();editCustomSong(${i})">✏️</button><button class="btn btn-small btn-secondary" onclick="event.stopPropagation();deleteCustomSong(${i})" style="color:#e74c3c">🗑️</button></div>`;
+    c.onclick=()=>openSongPlayer(s);g.appendChild(c)});
+}
+
+function editCustomSong(i){
+  const s=customSongs[i];
+  document.getElementById('customSongName').value=s.name;
+  document.getElementById('customSongNotes').value=s.rawInput||s.notes.join(' ');
+  document.getElementById('customSongBeat').value=s.beat||1;
+  customSongs.splice(i,1);
+  saveCustomSongs();
+  window.scrollTo(0,0);
+}
+
+function deleteCustomSong(i){
+  if(confirm('Delete "'+customSongs[i].name+'"?')){customSongs.splice(i,1);saveCustomSongs()}
+}
 
 function openSongPlayer(song){
   document.getElementById('songPlayerTitle').textContent=song.name;
